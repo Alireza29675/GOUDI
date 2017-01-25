@@ -1,0 +1,25 @@
+{
+  "name": "goudi",
+  "version": "1.0.0",
+  "description": "Goudi is a multi-layer presentation application, inspired by mindmaps and some other thinking and describing methods",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alireza29675/Goudi.git"
+  },
+  "keywords": [
+    "goudi",
+    "presentation",
+    "thinking",
+    "describing"
+  ],
+  "author": "Alireza Sheikholmolouki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Alireza29675/Goudi/issues"
+  },
+  "homepage": "https://github.com/Alireza29675/Goudi#readme"
+}
