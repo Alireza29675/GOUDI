@@ -1,6 +1,6 @@
 import Goudi from '../../src/index.js'
 
-const goudi = new Goudi()
+window.goudi = new Goudi()
 
 class App {
 

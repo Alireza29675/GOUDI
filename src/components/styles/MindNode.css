@@ -1,0 +1,7 @@
+.mind-node {
+    min-width: 50px;
+    min-height: 50px;
+    background: grey;
+    position: absolute;
+    border-radius: 50%;
+}
