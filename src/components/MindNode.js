@@ -3,14 +3,15 @@ import './styles/MindNode.css'
 
 class MindNode {
 
-    constructor (parent, i) {
+    constructor (text, style = {}, parent, i) {
+        this.text = text
         this.parent = parent
         this.index = i
         this.moveRate = Math.floor(Math.random() * 10) + 10
         this.style = {
-            size: 0,
-            x: 0,
-            y: 0
+            size: style.size || 50,
+            x: style.x || 0,
+            y: style.y || 0
         }
         this.wishStyle = this.style
         this.init()
@@ -21,8 +22,32 @@ class MindNode {
         this.REAL_ELEMENT_SIZE = 600
         this.element.style.width = this.element.style.height = `${this.REAL_ELEMENT_SIZE}px`
         this.addClass('mind-node')
+        this.addTextElement(this.text)
         document.body.appendChild(this.element)
         this.render()
+    }
+
+    addTextElement (text) {
+        this.textElement = document.createElement('span')
+        this.textElement.classList = 'node-text'
+        this.textElement.style.maxWidth = this.REAL_ELEMENT_SIZE + 'px'
+        this.setElementText(text)
+        this.element.appendChild(this.textElement)
+    }
+
+    fitText () {
+        const limitBorder = this.REAL_ELEMENT_SIZE * 0.7
+        const {offsetWidth, offsetHeight} = this.textElement;
+        const biggestEdge = Math.max(offsetWidth, offsetHeight)
+        const scale = limitBorder / biggestEdge
+        const matrix = (new CssToMatrix()).translate3d(-offsetWidth/2,-offsetHeight/2,-1).scale(scale, scale).getMatrixCSS()
+        this.textElement.style.transform = matrix
+    }
+
+    setElementText (text) {
+        this.text = text
+        this.textElement.innerHTML = text
+        setTimeout(this.fitText.bind(this), 1)
     }
 
     addClass (name) {

@@ -54,10 +54,10 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	window.goudi = new _index2.default();
-
 	var App = function App() {
 	    _classCallCheck(this, App);
+
+	    window.Presentation = new _index2.default();
 	};
 
 	window.app = new App();
@@ -74,11 +74,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	__webpack_require__(7);
+	__webpack_require__(2);
 
-	var _MindNode = __webpack_require__(2);
+	var _MindNodes = __webpack_require__(13);
 
-	var _MindNode2 = _interopRequireDefault(_MindNode);
+	var _MindNodes2 = _interopRequireDefault(_MindNodes);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -86,80 +86,22 @@
 
 	var Goudi = function () {
 	    function Goudi() {
-	        var _this = this;
-
 	        _classCallCheck(this, Goudi);
 
 	        this.init();
-	        var index = 0;
-	        setInterval(function () {
-	            _this.mindNodes[index].set({
-	                x: Math.random() * window.innerWidth,
-	                y: Math.random() * window.innerHeight,
-	                size: Math.random() * 30 + 10
-	            });
-	            index++;
-	        }, 50);
 	    }
 
 	    _createClass(Goudi, [{
 	        key: 'init',
 	        value: function init() {
-	            this.mindNodes = [];
-	            this.mindNodeShouldRenderMap = [];
-	            this.addMindNodes();
+	            this.MindNodes = new _MindNodes2.default();
 	            this.render();
-	        }
-	    }, {
-	        key: 'addMindNodes',
-	        value: function addMindNodes() {
-	            var _iteratorNormalCompletion = true;
-	            var _didIteratorError = false;
-	            var _iteratorError = undefined;
-
-	            try {
-	                for (var _iterator = new Array(200)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                    var i = _step.value;
-	                    this.addMindNode();
-	                }
-	            } catch (err) {
-	                _didIteratorError = true;
-	                _iteratorError = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion && _iterator.return) {
-	                        _iterator.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError) {
-	                        throw _iteratorError;
-	                    }
-	                }
-	            }
-	        }
-	    }, {
-	        key: 'addMindNode',
-	        value: function addMindNode() {
-	            this.mindNodes.push(new _MindNode2.default(this, this.mindNodes.length));
-	            this.mindNodeShouldRenderMap.push(false);
-	        }
-	    }, {
-	        key: 'addToRenderer',
-	        value: function addToRenderer(index) {
-	            this.mindNodeShouldRenderMap[index] = true;
-	        }
-	    }, {
-	        key: 'removeFromRenderer',
-	        value: function removeFromRenderer(index) {
-	            this.mindNodeShouldRenderMap[index] = false;
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
 	            requestAnimationFrame(this.render.bind(this));
-	            for (var i = 0; i < this.mindNodes.length; i++) {
-	                if (this.mindNodeShouldRenderMap[i]) this.mindNodes[i].render();
-	            }
+	            this.MindNodes.render();
 	        }
 	    }]);
 
@@ -172,131 +114,20 @@
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _cssToMatrix = __webpack_require__(9);
-
-	var _cssToMatrix2 = _interopRequireDefault(_cssToMatrix);
-
-	__webpack_require__(3);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var MindNode = function () {
-	    function MindNode(parent, i) {
-	        _classCallCheck(this, MindNode);
-
-	        this.parent = parent;
-	        this.index = i;
-	        this.moveRate = Math.floor(Math.random() * 10) + 10;
-	        this.style = {
-	            size: 0,
-	            x: 0,
-	            y: 0
-	        };
-	        this.wishStyle = this.style;
-	        this.init();
-	    }
-
-	    _createClass(MindNode, [{
-	        key: 'init',
-	        value: function init() {
-	            this.element = document.createElement('div');
-	            this.REAL_ELEMENT_SIZE = 600;
-	            this.element.style.width = this.element.style.height = this.REAL_ELEMENT_SIZE + 'px';
-	            this.addClass('mind-node');
-	            document.body.appendChild(this.element);
-	            this.render();
-	        }
-	    }, {
-	        key: 'addClass',
-	        value: function addClass(name) {
-	            this.element.classList.add(name);
-	        }
-	    }, {
-	        key: 'removeClass',
-	        value: function removeClass(name) {
-	            this.element.classList.remove(name);
-	        }
-	    }, {
-	        key: 'getMatrix',
-	        value: function getMatrix() {
-	            var _style = this.style,
-	                size = _style.size,
-	                x = _style.x,
-	                y = _style.y;
-
-	            return new _cssToMatrix2.default().translate3d(x - this.REAL_ELEMENT_SIZE / 2, y - this.REAL_ELEMENT_SIZE / 2, -1).scale(size / this.REAL_ELEMENT_SIZE, size / this.REAL_ELEMENT_SIZE).getMatrixCSS();
-	        }
-	    }, {
-	        key: 'set',
-	        value: function set(styleObject) {
-	            this.wishStyle = {
-	                size: styleObject.size || this.wishStyle.size,
-	                x: styleObject.x || this.wishStyle.x,
-	                y: styleObject.y || this.wishStyle.y
-	            };
-	            this.parent.addToRenderer(this.index);
-	        }
-	    }, {
-	        key: 'fixTransformChanges',
-	        value: function fixTransformChanges() {
-	            var RATE = this.moveRate;
-	            this.style = {
-	                size: this.style.size + (this.wishStyle.size - this.style.size) / RATE,
-	                x: this.style.x + (this.wishStyle.x - this.style.x) / RATE,
-	                y: this.style.y + (this.wishStyle.y - this.style.y) / RATE
-	            };
-	            return this;
-	        }
-	    }, {
-	        key: 'needRender',
-	        value: function needRender() {
-	            if (Math.abs(this.style.size - this.wishStyle.size) > 2) return true;
-	            if (Math.abs(this.style.x - this.wishStyle.x) > 2) return true;
-	            if (Math.abs(this.style.y - this.wishStyle.y) > 2) return true;
-	            return false;
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            this.fixTransformChanges();
-	            this.element.style.transform = this.getMatrix();
-	            if (!this.needRender()) this.parent.removeFromRenderer(this.index);
-	        }
-	    }]);
-
-	    return MindNode;
-	}();
-
-	exports.default = MindNode;
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(4);
+	var content = __webpack_require__(3);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(6)(content, {});
+	var update = __webpack_require__(5)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
 		// When the styles change, update the <style> tags
 		if(!content.locals) {
-			module.hot.accept("!!./../../../node_modules/css-loader/index.js!./MindNode.css", function() {
-				var newContent = require("!!./../../../node_modules/css-loader/index.js!./MindNode.css");
+			module.hot.accept("!!./../../../node_modules/css-loader/index.js!./Basics.css", function() {
+				var newContent = require("!!./../../../node_modules/css-loader/index.js!./Basics.css");
 				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
 				update(newContent);
 			});
@@ -306,21 +137,21 @@
 	}
 
 /***/ },
-/* 4 */
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(5)();
+	exports = module.exports = __webpack_require__(4)();
 	// imports
 
 
 	// module
-	exports.push([module.id, ".mind-node {\n    min-width: 50px;\n    min-height: 50px;\n    background: grey;\n    position: absolute;\n    border-radius: 50%;\n}", ""]);
+	exports.push([module.id, "body {\n    overflow: hidden;\n    background: rgb(51,53,64)\n}", ""]);
 
 	// exports
 
 
 /***/ },
-/* 5 */
+/* 4 */
 /***/ function(module, exports) {
 
 	/*
@@ -376,7 +207,7 @@
 
 
 /***/ },
-/* 6 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -628,52 +459,158 @@
 
 
 /***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _cssToMatrix = __webpack_require__(7);
+
+	var _cssToMatrix2 = _interopRequireDefault(_cssToMatrix);
+
+	__webpack_require__(11);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var MindNode = function () {
+	    function MindNode(text) {
+	        var style = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	        var parent = arguments[2];
+	        var i = arguments[3];
+
+	        _classCallCheck(this, MindNode);
+
+	        this.text = text;
+	        this.parent = parent;
+	        this.index = i;
+	        this.moveRate = Math.floor(Math.random() * 10) + 10;
+	        this.style = {
+	            size: style.size || 50,
+	            x: style.x || 0,
+	            y: style.y || 0
+	        };
+	        this.wishStyle = this.style;
+	        this.init();
+	    }
+
+	    _createClass(MindNode, [{
+	        key: 'init',
+	        value: function init() {
+	            this.element = document.createElement('div');
+	            this.REAL_ELEMENT_SIZE = 600;
+	            this.element.style.width = this.element.style.height = this.REAL_ELEMENT_SIZE + 'px';
+	            this.addClass('mind-node');
+	            this.addTextElement(this.text);
+	            document.body.appendChild(this.element);
+	            this.render();
+	        }
+	    }, {
+	        key: 'addTextElement',
+	        value: function addTextElement(text) {
+	            this.textElement = document.createElement('span');
+	            this.textElement.classList = 'node-text';
+	            this.textElement.style.maxWidth = this.REAL_ELEMENT_SIZE + 'px';
+	            this.setElementText(text);
+	            this.element.appendChild(this.textElement);
+	        }
+	    }, {
+	        key: 'fitText',
+	        value: function fitText() {
+	            var limitBorder = this.REAL_ELEMENT_SIZE * 0.7;
+	            var _textElement = this.textElement,
+	                offsetWidth = _textElement.offsetWidth,
+	                offsetHeight = _textElement.offsetHeight;
+
+	            var biggestEdge = Math.max(offsetWidth, offsetHeight);
+	            var scale = limitBorder / biggestEdge;
+	            var matrix = new _cssToMatrix2.default().translate3d(-offsetWidth / 2, -offsetHeight / 2, -1).scale(scale, scale).getMatrixCSS();
+	            this.textElement.style.transform = matrix;
+	        }
+	    }, {
+	        key: 'setElementText',
+	        value: function setElementText(text) {
+	            this.text = text;
+	            this.textElement.innerHTML = text;
+	            setTimeout(this.fitText.bind(this), 1);
+	        }
+	    }, {
+	        key: 'addClass',
+	        value: function addClass(name) {
+	            this.element.classList.add(name);
+	        }
+	    }, {
+	        key: 'removeClass',
+	        value: function removeClass(name) {
+	            this.element.classList.remove(name);
+	        }
+	    }, {
+	        key: 'getMatrix',
+	        value: function getMatrix() {
+	            var _style = this.style,
+	                size = _style.size,
+	                x = _style.x,
+	                y = _style.y;
+
+	            return new _cssToMatrix2.default().translate3d(x - this.REAL_ELEMENT_SIZE / 2, y - this.REAL_ELEMENT_SIZE / 2, -1).scale(size / this.REAL_ELEMENT_SIZE, size / this.REAL_ELEMENT_SIZE).getMatrixCSS();
+	        }
+	    }, {
+	        key: 'set',
+	        value: function set(styleObject) {
+	            this.wishStyle = {
+	                size: styleObject.size || this.wishStyle.size,
+	                x: styleObject.x || this.wishStyle.x,
+	                y: styleObject.y || this.wishStyle.y
+	            };
+	            this.parent.addToRenderer(this.index);
+	        }
+	    }, {
+	        key: 'fixTransformChanges',
+	        value: function fixTransformChanges() {
+	            var RATE = this.moveRate;
+	            this.style = {
+	                size: this.style.size + (this.wishStyle.size - this.style.size) / RATE,
+	                x: this.style.x + (this.wishStyle.x - this.style.x) / RATE,
+	                y: this.style.y + (this.wishStyle.y - this.style.y) / RATE
+	            };
+	            return this;
+	        }
+	    }, {
+	        key: 'needRender',
+	        value: function needRender() {
+	            if (Math.abs(this.style.size - this.wishStyle.size) > 2) return true;
+	            if (Math.abs(this.style.x - this.wishStyle.x) > 2) return true;
+	            if (Math.abs(this.style.y - this.wishStyle.y) > 2) return true;
+	            return false;
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            this.fixTransformChanges();
+	            this.element.style.transform = this.getMatrix();
+	            if (!this.needRender()) this.parent.removeFromRenderer(this.index);
+	        }
+	    }]);
+
+	    return MindNode;
+	}();
+
+	exports.default = MindNode;
+
+/***/ },
 /* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// style-loader: Adds some css to the DOM by adding a <style> tag
-
-	// load the styles
-	var content = __webpack_require__(8);
-	if(typeof content === 'string') content = [[module.id, content, '']];
-	// add the styles to the DOM
-	var update = __webpack_require__(6)(content, {});
-	if(content.locals) module.exports = content.locals;
-	// Hot Module Replacement
-	if(false) {
-		// When the styles change, update the <style> tags
-		if(!content.locals) {
-			module.hot.accept("!!./../../../node_modules/css-loader/index.js!./Basics.css", function() {
-				var newContent = require("!!./../../../node_modules/css-loader/index.js!./Basics.css");
-				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-				update(newContent);
-			});
-		}
-		// When the module is disposed, remove the <style> tags
-		module.hot.dispose(function() { update(); });
-	}
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports = module.exports = __webpack_require__(5)();
-	// imports
-
-
-	// module
-	exports.push([module.id, "body {\n    overflow: hidden;\n    background: radial-gradient(#FFF, #CCC)\n}", ""]);
-
-	// exports
-
-
-/***/ },
-/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	(function(root, factory) {
 	    if(true) {
-	        module.exports = factory(__webpack_require__(10), __webpack_require__(11), __webpack_require__(12));
+	        module.exports = factory(__webpack_require__(8), __webpack_require__(9), __webpack_require__(10));
 	    }
 	    else if(typeof define === 'function' && define.amd) {
 	        define('css-to-matrix', ['transform-to-matrix', 'matrix-utilities', 'umodel'], factory);
@@ -914,7 +851,7 @@
 	}));
 
 /***/ },
-/* 10 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	(function(root, factory) {
@@ -1006,7 +943,7 @@
 	}));
 
 /***/ },
-/* 11 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	(function(root, factory) {
@@ -1094,7 +1031,7 @@
 	}));
 
 /***/ },
-/* 12 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	(function(root, factory) {
@@ -1295,6 +1232,143 @@
 	    return umodel;
 	}));
 
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(12);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(5)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../../node_modules/css-loader/index.js!./MindNode.css", function() {
+				var newContent = require("!!./../../../node_modules/css-loader/index.js!./MindNode.css");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(4)();
+	// imports
+
+
+	// module
+	exports.push([module.id, ".mind-node {\n    min-width: 50px;\n    min-height: 50px;\n    background: rgb(94,94,94);\n    border: 10px solid #FFF;\n    position: absolute;\n    border-radius: 50%;\n    transition-property: opacity, border-color, background;\n    transition-duration: 0.3s;\n}\n.mind-node span.node-text {\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    margin: 0;\n    text-align: center;\n    font-family: 'Exo', 'Myriad Pro', 'IRANSans';\n    font-size: 5vw;\n    line-height: 5vw;\n    letter-spacing: 3px;\n    margin-right: -6px;\n    margin-top: 8px;\n    font-weight: normal;\n    color: white;\n    cursor: default;\n}\n.mind-node.select {\n    border-color: #70D9DF;\n}\n.mind-node.select span.node-text {\n    color: #70D9DF;\n}\n.mind-node.fill {\n    border-color: #FFF;\n    background: #70D9DF;\n}", ""]);
+
+	// exports
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _MindNode = __webpack_require__(6);
+
+	var _MindNode2 = _interopRequireDefault(_MindNode);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var MindNodes = function () {
+	    function MindNodes() {
+	        _classCallCheck(this, MindNodes);
+
+	        this.Nodes = [];
+	        this.mindNodeShouldRenderMap = [];
+	        this.addMindNodes();
+	    }
+
+	    _createClass(MindNodes, [{
+	        key: 'addMindNodes',
+	        value: function addMindNodes() {
+	            var names = ['Customer Relationship', 'Value Proposition', 'Revenue Structure', 'Marketing', 'Events', 'Doing things well'];
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = new Array(100)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var i = _step.value;
+
+	                    this.addMindNode(names[Math.floor(Math.random() * names.length)], {
+	                        size: Math.random() * 60 + 30,
+	                        x: Math.random() * innerWidth,
+	                        y: Math.random() * innerHeight
+	                    });
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+	        }
+	    }, {
+	        key: 'addMindNode',
+	        value: function addMindNode() {
+	            var text = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+	            var style = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+	            this.Nodes.push(new _MindNode2.default(text, style, this, this.Nodes.length));
+	            this.mindNodeShouldRenderMap.push(false);
+	        }
+	    }, {
+	        key: 'addToRenderer',
+	        value: function addToRenderer(index) {
+	            this.mindNodeShouldRenderMap[index] = true;
+	        }
+	    }, {
+	        key: 'removeFromRenderer',
+	        value: function removeFromRenderer(index) {
+	            this.mindNodeShouldRenderMap[index] = false;
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            for (var i = 0; i < this.Nodes.length; i++) {
+	                if (this.mindNodeShouldRenderMap[i]) {
+	                    this.Nodes[i].render();
+	                }
+	            }
+	        }
+	    }]);
+
+	    return MindNodes;
+	}();
+
+	exports.default = MindNodes;
 
 /***/ }
 /******/ ]);
