@@ -1,7 +1,7 @@
 import GLText from './GLText'
 
 class Node {
-    constructor (x = 0, y = 0, z = 0) {
+    constructor (x = 0, y = 0, z = 0, size = 50) {
         // Position object for storing current position
         this.position = {x: x, y: y, z: z}
         // Node Geometry
@@ -16,7 +16,10 @@ class Node {
         // Combining geometry and material
         this.mesh = new THREE.Mesh(this.geometry, this.material)
         // set text
-        this.setText('Alireza')
+        this.addText('Customer')
+        // set Node's size and scale
+        this.size = size
+        this.setSize(size)
         // Set position of mesh
         this.setPos(this.position)
     }
@@ -30,17 +33,28 @@ class Node {
         // Setting mesh position
         this.getObject3D().position.set(obj.x, obj.y, obj.z)
         this.text.getObject3D().position.set(
-            obj.x - (this.text.getSize().width / 2),
-            obj.y - (this.text.getSize().height / 2),
-            obj.z - (this.text.getSize().depth / 2),
+            -(this.text.getSize().width / 2),
+            -(this.text.getSize().height / 2),
+            -(this.text.getSize().depth / 2),
         )
         this.position = obj
     }
-    setText (text) {
+    addText (text) {
         this.text = new GLText(text)
+        this.getObject3D().add(this.text.getObject3D())
+    }
+    setText (text) {
+        this.text.setText(text)
+        this.setSize(this.size)
+        this.setPos()
     }
     getObject3D () {
         return this.mesh
+    }
+    setSize (size) {
+        this.size = size
+        this.getObject3D().scale.x = this.getObject3D().scale.y = size / 50
+        this.text.setScale(size)
     }
 }
 

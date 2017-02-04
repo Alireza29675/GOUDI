@@ -6,7 +6,7 @@ class Scene {
         // Adding Scene
         this.object = new THREE.Scene()
         // Adding Camera
-        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 3000)
+        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000)
         // Adding lights to Scene
         this.object.add(lights.globalAmbient)
         this.object.add(lights.topLight)
@@ -14,6 +14,11 @@ class Scene {
         // Adding nodes to Scene
         this.nodesManage = new NodesManage(this.object)
         this.nodesManage.addNode(0, 0, -1000)
+        // add zoom out and in on mouse wheel
+        window.addEventListener('mousewheel', e => { this.onMouseWheel(e) })
+    }
+    onMouseWheel (e) {
+        this.camera.position.z -= e.deltaY
     }
     render () {
         lights.topLight.position.x = (MOUSE.x - (window.innerWidth / 2)) / window.innerWidth * 2000

@@ -199,12 +199,14 @@
 
 	var Scene = function () {
 	    function Scene(options) {
+	        var _this = this;
+
 	        _classCallCheck(this, Scene);
 
 	        // Adding Scene
 	        this.object = new THREE.Scene();
 	        // Adding Camera
-	        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 3000);
+	        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000);
 	        // Adding lights to Scene
 	        this.object.add(_Lights2.default.globalAmbient);
 	        this.object.add(_Lights2.default.topLight);
@@ -212,9 +214,18 @@
 	        // Adding nodes to Scene
 	        this.nodesManage = new _NodesManage2.default(this.object);
 	        this.nodesManage.addNode(0, 0, -1000);
+	        // add zoom out and in on mouse wheel
+	        window.addEventListener('mousewheel', function (e) {
+	            _this.onMouseWheel(e);
+	        });
 	    }
 
 	    _createClass(Scene, [{
+	        key: 'onMouseWheel',
+	        value: function onMouseWheel(e) {
+	            this.camera.position.z -= e.deltaY;
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	            _Lights2.default.topLight.position.x = (MOUSE.x - window.innerWidth / 2) / window.innerWidth * 2000;
@@ -274,6 +285,7 @@
 	    function NodesManage(scene) {
 	        _classCallCheck(this, NodesManage);
 
+	        this.nodes = [];
 	        this.scene = scene;
 	    }
 
@@ -286,7 +298,7 @@
 
 	            var node = new _Node2.default(x, y, z);
 	            this.scene.add(node.getObject3D());
-	            this.scene.add(node.text.getObject3D());
+	            this.nodes.push(node);
 	            return node;
 	        }
 	    }]);
@@ -321,6 +333,7 @@
 	        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 	        var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+	        var size = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 50;
 
 	        _classCallCheck(this, Node);
 
@@ -338,7 +351,10 @@
 	        // Combining geometry and material
 	        this.mesh = new THREE.Mesh(this.geometry, this.material);
 	        // set text
-	        this.setText('Alireza');
+	        this.addText('Customer');
+	        // set Node's size and scale
+	        this.size = size;
+	        this.setSize(size);
 	        // Set position of mesh
 	        this.setPos(this.position);
 	    }
@@ -356,18 +372,33 @@
 	            if (typeof obj.z === 'string') obj.z = parseFloat(obj.z) + this.position.z;
 	            // Setting mesh position
 	            this.getObject3D().position.set(obj.x, obj.y, obj.z);
-	            this.text.getObject3D().position.set(obj.x - this.text.getSize().width / 2, obj.y - this.text.getSize().height / 2, obj.z - this.text.getSize().depth / 2);
+	            this.text.getObject3D().position.set(-(this.text.getSize().width / 2), -(this.text.getSize().height / 2), -(this.text.getSize().depth / 2));
 	            this.position = obj;
+	        }
+	    }, {
+	        key: 'addText',
+	        value: function addText(text) {
+	            this.text = new _GLText2.default(text);
+	            this.getObject3D().add(this.text.getObject3D());
 	        }
 	    }, {
 	        key: 'setText',
 	        value: function setText(text) {
-	            this.text = new _GLText2.default(text);
+	            this.text.setText(text);
+	            this.setSize(this.size);
+	            this.setPos();
 	        }
 	    }, {
 	        key: 'getObject3D',
 	        value: function getObject3D() {
 	            return this.mesh;
+	        }
+	    }, {
+	        key: 'setSize',
+	        value: function setSize(size) {
+	            this.size = size;
+	            this.getObject3D().scale.x = this.getObject3D().scale.y = size / 50;
+	            this.text.setScale(size);
 	        }
 	    }]);
 
@@ -392,25 +423,40 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var GLText = function () {
-	    function GLText(message) {
+	    function GLText(text) {
 	        var parameters = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
 	        _classCallCheck(this, GLText);
 
-	        this.geometry = new THREE.TextGeometry(message, {
-	            font: window.GL_FONTS.droid,
-	            height: 20,
-	            size: 15
-	        });
+	        this.storedRadius = 50;
+	        this.geometry = this.getGeometry(text);
 	        this.material = new THREE.MeshStandardMaterial({
 	            color: 0xffffff,
 	            roughness: 0.8,
 	            metalness: 0.5
 	        });
 	        this.mesh = new THREE.Mesh(this.geometry, this.material);
+	        this.size = this.getSize();
 	    }
 
 	    _createClass(GLText, [{
+	        key: "setText",
+	        value: function setText(text) {
+	            this.mesh.scale.x = this.mesh.scale.y = 1;
+	            this.mesh.geometry = this.getGeometry(text);
+	        }
+	    }, {
+	        key: "getGeometry",
+	        value: function getGeometry(text) {
+	            var geometry = new THREE.TextGeometry(text, {
+	                font: window.GL_FONTS.droid,
+	                height: 5,
+	                size: 15
+	            });
+	            geometry.dispose();
+	            return geometry;
+	        }
+	    }, {
 	        key: "getSize",
 	        value: function getSize() {
 	            var box = new THREE.Box3().setFromObject(this.mesh);
@@ -424,6 +470,15 @@
 	        key: "getObject3D",
 	        value: function getObject3D() {
 	            return this.mesh;
+	        }
+	    }, {
+	        key: "setScale",
+	        value: function setScale(radius) {
+	            var padding = 30;
+	            var idealWidth = radius * 2 - padding;
+	            this.size = this.getSize();
+	            var scaleRate = idealWidth / Math.max(this.size.width, this.size.height * 1.5);
+	            this.getObject3D().scale.x = this.getObject3D().scale.y = scaleRate;
 	        }
 	    }]);
 
