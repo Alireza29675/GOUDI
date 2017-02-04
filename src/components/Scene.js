@@ -23,6 +23,16 @@ class Scene {
         // add zoom out and in on mouse wheel
         window.addEventListener('mousewheel', e => { this.onMouseWheel(e) })
     }
+    onResize () {
+        // Storing current position and rotation
+        const cameraPos = this.camera.position
+        const cameraRot = this.camera.rotation
+        // building a new camera
+        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000)
+        // pasting previous position and rotation
+        this.camera.position.set(cameraPos.x, cameraPos.y, cameraPos.z)
+        this.camera.rotation.set(cameraRot.x, cameraRot.y, cameraRot.z)
+    }
     onMouseWheel (e) {
         this.camera.position.z -= e.deltaY
     }

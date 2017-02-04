@@ -35,8 +35,16 @@ class Goudi {
         // define the scene and renderer
         this.scene = new Scene(this.options)
         this.renderer = this.makeRenderer()
+        // Responsive
+        window.addEventListener('resize', this.onResize.bind(this))
         // start rendering
         this.render()
+    }
+    onResize () {
+        this.options.W = window.innerWidth
+        this.options.H = window.innerHeight
+        this.renderer.setSize(this.options.W, this.options.H)
+        this.scene.onResize()
     }
     makeRenderer () {
         // defining the renderer

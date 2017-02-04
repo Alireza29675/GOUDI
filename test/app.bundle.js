@@ -139,11 +139,21 @@
 	        // define the scene and renderer
 	        this.scene = new _Scene2.default(this.options);
 	        this.renderer = this.makeRenderer();
+	        // Responsive
+	        window.addEventListener('resize', this.onResize.bind(this));
 	        // start rendering
 	        this.render();
 	    }
 
 	    _createClass(Goudi, [{
+	        key: 'onResize',
+	        value: function onResize() {
+	            this.options.W = window.innerWidth;
+	            this.options.H = window.innerHeight;
+	            this.renderer.setSize(this.options.W, this.options.H);
+	            this.scene.onResize();
+	        }
+	    }, {
 	        key: 'makeRenderer',
 	        value: function makeRenderer() {
 	            // defining the renderer
@@ -229,6 +239,18 @@
 	    }
 
 	    _createClass(Scene, [{
+	        key: 'onResize',
+	        value: function onResize() {
+	            // Storing current position and rotation
+	            var cameraPos = this.camera.position;
+	            var cameraRot = this.camera.rotation;
+	            // building a new camera
+	            this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000);
+	            // pasting previous position and rotation
+	            this.camera.position.set(cameraPos.x, cameraPos.y, cameraPos.z);
+	            this.camera.rotation.set(cameraRot.x, cameraRot.y, cameraRot.z);
+	        }
+	    }, {
 	        key: 'onMouseWheel',
 	        value: function onMouseWheel(e) {
 	            this.camera.position.z -= e.deltaY;
