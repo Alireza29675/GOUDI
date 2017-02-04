@@ -46,6 +46,8 @@
 
 	'use strict';
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	var _index = __webpack_require__(1);
 
 	var _index2 = _interopRequireDefault(_index);
@@ -54,13 +56,30 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var App = function App() {
-	    _classCallCheck(this, App);
+	var App = function () {
+	    function App() {
+	        _classCallCheck(this, App);
+	    }
 
-	    window.Presentation = new _index2.default('.board');
-	};
+	    _createClass(App, [{
+	        key: 'start',
+	        value: function start() {
+	            window.Presentation = new _index2.default('.board');
+	        }
+	    }]);
+
+	    return App;
+	}();
 
 	window.app = new App();
+
+	// loading basic fonts
+	window.GL_FONTS = {};
+	var fontLoader = new THREE.FontLoader();
+	fontLoader.load('droid_sans_regular.typeface.json', function (response) {
+	    window.GL_FONTS["droid"] = response;
+	    window.app.start();
+	});
 
 /***/ },
 /* 1 */
@@ -74,13 +93,36 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Scene = __webpack_require__(9);
+	var _Scene = __webpack_require__(2);
 
 	var _Scene2 = _interopRequireDefault(_Scene);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	// Calculating mouse status
+	window.MOUSE = {
+	    x: 0, y: 0, down: false,
+	    downPos: { x: 0, y: 0 },
+	    upPos: { x: 0, y: 0 }
+	};
+	window.addEventListener('mousemove', function (e) {
+	    window.MOUSE.x = e.clientX;
+	    window.MOUSE.y = e.clientY;
+	});
+	window.addEventListener('mousedown', function (e) {
+	    window.MOUSE.down = true;
+	    window.MOUSE.downPos.x = e.clientX;
+	    window.MOUSE.downPos.y = e.clientY;
+	});
+	window.addEventListener('mouseup', function (e) {
+	    window.MOUSE.down = false;
+	    window.MOUSE.upPos.x = e.clientX;
+	    window.MOUSE.upPos.y = e.clientY;
+	});
+
+	// Goudi
 
 	var Goudi = function () {
 	    function Goudi(query) {
@@ -132,14 +174,7 @@
 	exports.default = Goudi;
 
 /***/ },
-/* 2 */,
-/* 3 */,
-/* 4 */,
-/* 5 */,
-/* 6 */,
-/* 7 */,
-/* 8 */,
-/* 9 */
+/* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -150,11 +185,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Lights = __webpack_require__(10);
+	var _Lights = __webpack_require__(3);
 
 	var _Lights2 = _interopRequireDefault(_Lights);
 
-	var _NodesManage = __webpack_require__(13);
+	var _NodesManage = __webpack_require__(4);
 
 	var _NodesManage2 = _interopRequireDefault(_NodesManage);
 
@@ -172,14 +207,21 @@
 	        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 3000);
 	        // Adding lights to Scene
 	        this.object.add(_Lights2.default.globalAmbient);
-	        this.object.add(_Lights2.default.cameraLight);
+	        this.object.add(_Lights2.default.topLight);
+	        this.object.add(_Lights2.default.bottomLight);
 	        // Adding nodes to Scene
 	        this.nodesManage = new _NodesManage2.default(this.object);
+	        this.nodesManage.addNode(0, 0, -1000);
 	    }
 
 	    _createClass(Scene, [{
 	        key: 'render',
-	        value: function render() {}
+	        value: function render() {
+	            _Lights2.default.topLight.position.x = (MOUSE.x - window.innerWidth / 2) / window.innerWidth * 2000;
+	            _Lights2.default.bottomLight.position.x = (MOUSE.x - window.innerWidth / 2) / window.innerWidth * -2000;
+	            this.camera.rotation.y = (MOUSE.x - window.innerWidth / 2) / window.innerWidth * 0.01;
+	            this.camera.rotation.x = (MOUSE.y - window.innerHeight / 2) / window.innerHeight * 0.015;
+	        }
 	    }]);
 
 	    return Scene;
@@ -188,7 +230,7 @@
 	exports.default = Scene;
 
 /***/ },
-/* 10 */
+/* 3 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -196,15 +238,21 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.default = {
+	// define lights
+	var lights = {
 	    globalAmbient: new THREE.AmbientLight(0xffffff, 0.5),
-	    cameraLight: new THREE.PointLight(0xffffff, 0.4)
+	    topLight: new THREE.PointLight(0xffffff, 0.6),
+	    bottomLight: new THREE.PointLight(0xffffff, 0.1)
 	};
+	// Changing positions and etc
+	lights.topLight.position.y = 5000;
+	lights.bottomLight.position.y = -5000;
+	// exporting all of them
+	exports.default = lights;
 
 /***/ },
-/* 11 */,
-/* 12 */
-/***/ function(module, exports) {
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -213,6 +261,58 @@
 	});
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _Node = __webpack_require__(5);
+
+	var _Node2 = _interopRequireDefault(_Node);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var NodesManage = function () {
+	    function NodesManage(scene) {
+	        _classCallCheck(this, NodesManage);
+
+	        this.scene = scene;
+	    }
+
+	    _createClass(NodesManage, [{
+	        key: 'addNode',
+	        value: function addNode() {
+	            var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	            var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	            var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+	            var node = new _Node2.default(x, y, z);
+	            this.scene.add(node.getObject3D());
+	            this.scene.add(node.text.getObject3D());
+	            return node;
+	        }
+	    }]);
+
+	    return NodesManage;
+	}();
+
+	exports.default = NodesManage;
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _GLText = __webpack_require__(7);
+
+	var _GLText2 = _interopRequireDefault(_GLText);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -229,9 +329,16 @@
 	        // Node Geometry
 	        this.geometry = new THREE.SphereGeometry(50, 50, 50);
 	        // Node Material
-	        this.material = new THREE.MeshNormalMaterial();
+	        this.material = new THREE.MeshStandardMaterial({
+	            transparent: true,
+	            opacity: 0.3,
+	            roughness: 0.7,
+	            metalness: 0.5
+	        });
 	        // Combining geometry and material
 	        this.mesh = new THREE.Mesh(this.geometry, this.material);
+	        // set text
+	        this.setText('Alireza');
 	        // Set position of mesh
 	        this.setPos(this.position);
 	    }
@@ -248,8 +355,19 @@
 	            if (typeof obj.y === 'string') obj.y = parseFloat(obj.y) + this.position.y;
 	            if (typeof obj.z === 'string') obj.z = parseFloat(obj.z) + this.position.z;
 	            // Setting mesh position
-	            this.mesh.position.set(obj.x, obj.y, obj.z);
+	            this.getObject3D().position.set(obj.x, obj.y, obj.z);
+	            this.text.getObject3D().position.set(obj.x - this.text.getSize().width / 2, obj.y - this.text.getSize().height / 2, obj.z - this.text.getSize().depth / 2);
 	            this.position = obj;
+	        }
+	    }, {
+	        key: 'setText',
+	        value: function setText(text) {
+	            this.text = new _GLText2.default(text);
+	        }
+	    }, {
+	        key: 'getObject3D',
+	        value: function getObject3D() {
+	            return this.mesh;
 	        }
 	    }]);
 
@@ -259,30 +377,60 @@
 	exports.default = Node;
 
 /***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
+/* 6 */,
+/* 7 */
+/***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 
-	var _Node = __webpack_require__(12);
-
-	var _Node2 = _interopRequireDefault(_Node);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var NodesManage = function NodesManage(scene) {
-	    _classCallCheck(this, NodesManage);
+	var GLText = function () {
+	    function GLText(message) {
+	        var parameters = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-	    this.scene = scene;
-	};
+	        _classCallCheck(this, GLText);
 
-	exports.default = NodesManage;
+	        this.geometry = new THREE.TextGeometry(message, {
+	            font: window.GL_FONTS.droid,
+	            height: 20,
+	            size: 15
+	        });
+	        this.material = new THREE.MeshStandardMaterial({
+	            color: 0xffffff,
+	            roughness: 0.8,
+	            metalness: 0.5
+	        });
+	        this.mesh = new THREE.Mesh(this.geometry, this.material);
+	    }
+
+	    _createClass(GLText, [{
+	        key: "getSize",
+	        value: function getSize() {
+	            var box = new THREE.Box3().setFromObject(this.mesh);
+	            return {
+	                width: box.max.x - box.min.x,
+	                height: box.max.y - box.min.y,
+	                depth: box.max.z - box.min.z
+	            };
+	        }
+	    }, {
+	        key: "getObject3D",
+	        value: function getObject3D() {
+	            return this.mesh;
+	        }
+	    }]);
+
+	    return GLText;
+	}();
+
+	exports.default = GLText;
 
 /***/ }
 /******/ ]);
