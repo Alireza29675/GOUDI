@@ -54,7 +54,7 @@ class Node {
     setSize (size) {
         this.size = size
         this.getObject3D().scale.x = this.getObject3D().scale.y = size / 50
-        this.text.setScale(size)
+        this.text.setScale()
     }
 }
 

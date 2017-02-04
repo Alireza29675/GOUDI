@@ -197,6 +197,12 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	var ease = function ease(from, to) {
+	    var rate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 6;
+
+	    return from + (to - from) / rate;
+	};
+
 	var Scene = function () {
 	    function Scene(options) {
 	        var _this = this;
@@ -213,7 +219,9 @@
 	        this.object.add(_Lights2.default.bottomLight);
 	        // Adding nodes to Scene
 	        this.nodesManage = new _NodesManage2.default(this.object);
-	        this.nodesManage.addNode(0, 0, -1000);
+	        this.nodesManage.addNode(200, 0, -1000);
+	        this.nodesManage.addNode(0, 0, -1000, 100);
+	        this.nodesManage.addNode(-200, 0, -1000);
 	        // add zoom out and in on mouse wheel
 	        window.addEventListener('mousewheel', function (e) {
 	            _this.onMouseWheel(e);
@@ -228,10 +236,13 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            _Lights2.default.topLight.position.x = (MOUSE.x - window.innerWidth / 2) / window.innerWidth * 2000;
-	            _Lights2.default.bottomLight.position.x = (MOUSE.x - window.innerWidth / 2) / window.innerWidth * -2000;
-	            this.camera.rotation.y = (MOUSE.x - window.innerWidth / 2) / window.innerWidth * 0.01;
-	            this.camera.rotation.x = (MOUSE.y - window.innerHeight / 2) / window.innerHeight * 0.015;
+	            var W = window.innerWidth;
+	            var H = window.innerHeight;
+	            // Ease positions with animations relating to mouse movement
+	            _Lights2.default.topLight.position.x = ease(_Lights2.default.topLight.position.x, (MOUSE.x - W / 2) / W * -2000);
+	            _Lights2.default.bottomLight.position.x = ease(_Lights2.default.bottomLight.position.x, (MOUSE.x - W / 2) / W * 2000);
+	            this.camera.rotation.y = ease(this.camera.rotation.y, (MOUSE.x - W / 2) / W * -0.09);
+	            this.camera.rotation.x = ease(this.camera.rotation.x, (MOUSE.y - H / 2) / H * 0.015);
 	        }
 	    }]);
 
@@ -295,8 +306,9 @@
 	            var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	            var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 	            var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+	            var size = arguments[3];
 
-	            var node = new _Node2.default(x, y, z);
+	            var node = new _Node2.default(x, y, z, size);
 	            this.scene.add(node.getObject3D());
 	            this.nodes.push(node);
 	            return node;
@@ -398,7 +410,7 @@
 	        value: function setSize(size) {
 	            this.size = size;
 	            this.getObject3D().scale.x = this.getObject3D().scale.y = size / 50;
-	            this.text.setScale(size);
+	            this.text.setScale();
 	        }
 	    }]);
 
@@ -473,9 +485,9 @@
 	        }
 	    }, {
 	        key: "setScale",
-	        value: function setScale(radius) {
+	        value: function setScale() {
 	            var padding = 30;
-	            var idealWidth = radius * 2 - padding;
+	            var idealWidth = 100 - padding;
 	            this.size = this.getSize();
 	            var scaleRate = idealWidth / Math.max(this.size.width, this.size.height * 1.5);
 	            this.getObject3D().scale.x = this.getObject3D().scale.y = scaleRate;

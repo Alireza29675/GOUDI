@@ -1,6 +1,10 @@
 import lights from './Lights'
 import NodesManage from './NodesManage'
 
+const ease = (from, to, rate = 6) => {
+    return from + (to - from) / rate
+}
+
 class Scene {
     constructor (options) {
         // Adding Scene
@@ -13,7 +17,9 @@ class Scene {
         this.object.add(lights.bottomLight)
         // Adding nodes to Scene
         this.nodesManage = new NodesManage(this.object)
-        this.nodesManage.addNode(0, 0, -1000)
+        this.nodesManage.addNode(200, 0, -1000)
+        this.nodesManage.addNode(0, 0, -1000, 100)
+        this.nodesManage.addNode(-200, 0, -1000)
         // add zoom out and in on mouse wheel
         window.addEventListener('mousewheel', e => { this.onMouseWheel(e) })
     }
@@ -21,10 +27,25 @@ class Scene {
         this.camera.position.z -= e.deltaY
     }
     render () {
-        lights.topLight.position.x = (MOUSE.x - (window.innerWidth / 2)) / window.innerWidth * 2000
-        lights.bottomLight.position.x = (MOUSE.x - (window.innerWidth / 2)) / window.innerWidth * -2000
-        this.camera.rotation.y = (MOUSE.x - (window.innerWidth / 2)) / window.innerWidth * 0.01
-        this.camera.rotation.x = (MOUSE.y - (window.innerHeight / 2)) / window.innerHeight * 0.015
+        const W = window.innerWidth
+        const H = window.innerHeight
+        // Ease positions with animations relating to mouse movement
+        lights.topLight.position.x = ease (
+            lights.topLight.position.x,
+            (MOUSE.x - W/2) / W * -2000
+        )
+        lights.bottomLight.position.x = ease (
+            lights.bottomLight.position.x,
+            (MOUSE.x - W/2) / W * 2000
+        )
+        this.camera.rotation.y = ease (
+            this.camera.rotation.y,
+            (MOUSE.x - W/2) / W * -0.09
+        )
+        this.camera.rotation.x = ease (
+            this.camera.rotation.x,
+            (MOUSE.y - H/2) / H * 0.015
+        )
     }
 }
 

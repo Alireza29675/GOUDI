@@ -34,9 +34,9 @@ class GLText {
     getObject3D () {
         return this.mesh
     }
-    setScale (radius) {
+    setScale () {
         const padding = 30
-        const idealWidth = (radius * 2) - padding
+        const idealWidth = 100 - padding
         this.size = this.getSize()
         const scaleRate = idealWidth / Math.max(this.size.width, this.size.height * 1.5)
         this.getObject3D().scale.x = this.getObject3D().scale.y = scaleRate
