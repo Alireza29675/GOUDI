@@ -19,8 +19,10 @@ class GLText {
             font: window.GL_FONTS.droid,
             height: 5,
             size: 15,
-            curveSegments: 12,
-
+            curveSegments: 5,
+            bevelThickness: 0.5,
+            bevelSize: 0.3,
+            bevelEnabled: true
         })
         geometry.dispose()
         return geometry

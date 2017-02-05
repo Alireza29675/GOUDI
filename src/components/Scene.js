@@ -1,5 +1,6 @@
 import lights from './Lights'
 import NodesManage from './NodesManage'
+import keyboard from 'mousetrap'
 
 const ease = (from, to, rate = 6) => {
     return from + (to - from) / rate
@@ -24,6 +25,11 @@ class Scene {
         this.nodesManage.addNode(-200, 0, -1000)
         // add zoom out and in on mouse wheel
         window.addEventListener('mousewheel', e => { this.onMouseWheel(e) })
+        // reset camera // DEBUGGING
+        keyboard.bind('r e s e t c a m', e => {
+            this.camera.position.set(0, 0, 0)
+            this.camera.rotation.set(0, 0, 0)
+        })
     }
     onResize () {
         // Storing current position and rotation
@@ -39,9 +45,14 @@ class Scene {
         this.camera.position.z -= e.deltaY
     }
     render () {
+        // Ease positions with animations relating to mouse movement
+        this.easeParameters()
+        // Store camera data in every frame
+        this.storeCameraDataToLocalStorage()
+    }
+    easeParameters () {
         const W = window.innerWidth
         const H = window.innerHeight
-        // Ease positions with animations relating to mouse movement
         lights.topLight.position.x = ease (
             lights.topLight.position.x, // from
             (MOUSE.x - W/2) / W * -2000 // to
@@ -58,8 +69,6 @@ class Scene {
             this.camera.rotation.x, // from
             (MOUSE.y - H/2) / H * 0.015 // to
         )
-        // Store camera data in every frame
-        this.storeCameraDataToLocalStorage()
     }
     storeCameraDataToLocalStorage () {
         // stringify and store camera position and rotation to localStorage
