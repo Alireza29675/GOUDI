@@ -223,6 +223,8 @@
 	        this.object = new THREE.Scene();
 	        // Adding Camera
 	        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000);
+	        // set camera status from localStorage
+	        this.loadStoredCameraDataFromLocalStorage();
 	        // Adding lights to Scene
 	        this.object.add(_Lights2.default.globalAmbient);
 	        this.object.add(_Lights2.default.topLight);
@@ -261,10 +263,39 @@
 	            var W = window.innerWidth;
 	            var H = window.innerHeight;
 	            // Ease positions with animations relating to mouse movement
-	            _Lights2.default.topLight.position.x = ease(_Lights2.default.topLight.position.x, (MOUSE.x - W / 2) / W * -2000);
-	            _Lights2.default.bottomLight.position.x = ease(_Lights2.default.bottomLight.position.x, (MOUSE.x - W / 2) / W * 2000);
-	            this.camera.rotation.y = ease(this.camera.rotation.y, (MOUSE.x - W / 2) / W * -0.09);
-	            this.camera.rotation.x = ease(this.camera.rotation.x, (MOUSE.y - H / 2) / H * 0.015);
+	            _Lights2.default.topLight.position.x = ease(_Lights2.default.topLight.position.x, // from
+	            (MOUSE.x - W / 2) / W * -2000 // to
+	            );
+	            _Lights2.default.bottomLight.position.x = ease(_Lights2.default.bottomLight.position.x, // from
+	            (MOUSE.x - W / 2) / W * 2000 // to
+	            );
+	            this.camera.rotation.y = ease(this.camera.rotation.y, // from
+	            (MOUSE.x - W / 2) / W * -0.09 // to
+	            );
+	            this.camera.rotation.x = ease(this.camera.rotation.x, // from
+	            (MOUSE.y - H / 2) / H * 0.015 // to
+	            );
+	            // Store camera data in every frame
+	            this.storeCameraDataToLocalStorage();
+	        }
+	    }, {
+	        key: 'storeCameraDataToLocalStorage',
+	        value: function storeCameraDataToLocalStorage() {
+	            // stringify and store camera position and rotation to localStorage
+	            localStorage.setItem('camera', JSON.stringify({
+	                position: { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z },
+	                rotation: { x: this.camera.rotation.x, y: this.camera.rotation.y, z: this.camera.rotation.z }
+	            }));
+	        }
+	    }, {
+	        key: 'loadStoredCameraDataFromLocalStorage',
+	        value: function loadStoredCameraDataFromLocalStorage() {
+	            // if there was a camera item in localStorage set initial position and rotation of camera
+	            if (localStorage.getItem('camera') !== undefined) {
+	                var storedData = JSON.parse(localStorage.getItem('camera'));
+	                this.camera.position.set(storedData.position.x, storedData.position.y, storedData.position.z);
+	                this.camera.rotation.set(storedData.rotation.x, storedData.rotation.y, storedData.rotation.z);
+	            }
 	        }
 	    }]);
 
@@ -485,7 +516,9 @@
 	            var geometry = new THREE.TextGeometry(text, {
 	                font: window.GL_FONTS.droid,
 	                height: 5,
-	                size: 15
+	                size: 15,
+	                curveSegments: 12
+
 	            });
 	            geometry.dispose();
 	            return geometry;

@@ -18,7 +18,9 @@ class GLText {
         const geometry = new THREE.TextGeometry(text, {
             font: window.GL_FONTS.droid,
             height: 5,
-            size: 15
+            size: 15,
+            curveSegments: 12,
+
         })
         geometry.dispose()
         return geometry
