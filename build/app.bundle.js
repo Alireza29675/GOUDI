@@ -101,26 +101,12 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	// Calculating mouse status
+	// Initializing mouse status
 	window.MOUSE = {
 	    x: 0, y: 0, down: false,
 	    downPos: { x: 0, y: 0 },
 	    upPos: { x: 0, y: 0 }
 	};
-	window.addEventListener('mousemove', function (e) {
-	    window.MOUSE.x = e.clientX;
-	    window.MOUSE.y = e.clientY;
-	});
-	window.addEventListener('mousedown', function (e) {
-	    window.MOUSE.down = true;
-	    window.MOUSE.downPos.x = e.clientX;
-	    window.MOUSE.downPos.y = e.clientY;
-	});
-	window.addEventListener('mouseup', function (e) {
-	    window.MOUSE.down = false;
-	    window.MOUSE.upPos.x = e.clientX;
-	    window.MOUSE.upPos.y = e.clientY;
-	});
 
 	// Goudi
 
@@ -137,8 +123,8 @@
 	            H: window.innerHeight
 	        };
 	        // define the scene and renderer
-	        this.scene = new _Scene2.default(this.options);
 	        this.renderer = this.makeRenderer();
+	        this.scene = new _Scene2.default(this.options, this.renderer);
 	        // Responsive
 	        window.addEventListener('resize', this.onResize.bind(this));
 	        // start rendering
@@ -218,15 +204,18 @@
 	};
 
 	var Scene = function () {
-	    function Scene(options) {
+	    function Scene(options, renderer) {
 	        var _this = this;
 
 	        _classCallCheck(this, Scene);
 
+	        this.renderer = renderer;
 	        // Adding Scene
 	        this.object = new THREE.Scene();
 	        // Adding Camera
 	        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000);
+	        // defining Handler of Dom Events
+	        window.bindEvent = new THREEx.DomEvents(this.camera, this.renderer.domElement);
 	        // set camera status from localStorage
 	        this.loadStoredCameraDataFromLocalStorage();
 	        // Adding lights to Scene
@@ -246,6 +235,25 @@
 	        _mousetrap2.default.bind('r e s e t c a m', function (e) {
 	            _this.camera.position.set(0, 0, 0);
 	            _this.camera.rotation.set(0, 0, 0);
+	        });
+	        // Mouse hover and click detect
+	        window.addEventListener('mousemove', function (e) {
+	            window.MOUSE.x = e.clientX;
+	            window.MOUSE.y = e.clientY;
+	            _this.handleHover(e);
+	        });
+	        window.addEventListener('mousedown', function (e) {
+	            window.MOUSE.down = true;
+	            window.MOUSE.downPos.x = e.clientX;
+	            window.MOUSE.downPos.y = e.clientY;
+	        });
+	        window.addEventListener('mouseup', function (e) {
+	            window.MOUSE.down = false;
+	            window.MOUSE.upPos.x = e.clientX;
+	            window.MOUSE.upPos.y = e.clientY;
+	        });
+	        window.addEventListener('mousedown', function (e) {
+	            _this.handleClick(e);
 	        });
 	    }
 
@@ -411,6 +419,9 @@
 	    function Node() {
 	        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+	        var _this = this;
+
 	        var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	        var size = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 50;
 
@@ -430,18 +441,29 @@
 	        // Combining geometry and material
 	        this.mesh = new THREE.Mesh(this.geometry, this.material);
 	        // set text
-	        this.addText('Customer');
+	        this.addText('Application');
 	        // set Node's size and scale
 	        this.size = size;
 	        this.setSize(size);
 	        // Set position of mesh
-	        this.setPos(this.position);
+	        this.setPos(this.position, 1);
+	        // Binding mouse actions to Node
+	        window.bindEvent.addEventListener(this.mesh, 'click', function (e) {
+	            _this.onClick(e);
+	        }, false);
+	        window.bindEvent.addEventListener(this.mesh, 'mouseover', function (e) {
+	            _this.onHover(e);
+	        }, false);
+	        window.bindEvent.addEventListener(this.mesh, 'mouseout', function (e) {
+	            _this.onBlur(e);
+	        }, false);
 	    }
 
 	    _createClass(Node, [{
 	        key: 'setPos',
 	        value: function setPos() {
 	            var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	            var forceRate = arguments[1];
 
 	            // Merging obj and current position together
 	            obj = Object.assign({}, this.position, obj);
@@ -451,20 +473,20 @@
 	            if (typeof obj.z === 'string') obj.z = parseFloat(obj.z) + this.position.z;
 	            // Setting mesh position
 	            this.getObject3D().position.set(obj.x, obj.y, obj.z);
-	            this.text.getObject3D().position.set(-(this.text.getSize().width / 2), -(this.text.getSize().height / 2), -(this.text.getSize().depth / 2));
+	            var textSize = this.text.getSize(forceRate);
+	            this.text.getObject3D().position.set(-(textSize.width / 2), -(textSize.height / 2), -(textSize.depth / 2));
 	            this.position = obj;
 	        }
 	    }, {
 	        key: 'addText',
 	        value: function addText(text) {
-	            this.text = new _GLText2.default(text);
+	            this.text = new _GLText2.default(text, this.size);
 	            this.getObject3D().add(this.text.getObject3D());
 	        }
 	    }, {
 	        key: 'setText',
 	        value: function setText(text) {
 	            this.text.setText(text);
-	            this.setSize(this.size);
 	            this.setPos();
 	        }
 	    }, {
@@ -477,8 +499,19 @@
 	        value: function setSize(size) {
 	            this.size = size;
 	            this.getObject3D().scale.x = this.getObject3D().scale.y = size / 50;
-	            this.text.setScale();
+	            this.text.nodeSize = size;
 	        }
+	        // Binding Mouse Actions to Node
+
+	    }, {
+	        key: 'onClick',
+	        value: function onClick(e) {}
+	    }, {
+	        key: 'onHover',
+	        value: function onHover(e) {}
+	    }, {
+	        key: 'onBlur',
+	        value: function onBlur(e) {}
 	    }]);
 
 	    return Node;
@@ -501,11 +534,10 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var GLText = function () {
-	    function GLText(text) {
-	        var parameters = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
+	    function GLText(text, nodeSize) {
 	        _classCallCheck(this, GLText);
 
+	        this.nodeSize = nodeSize;
 	        this.storedRadius = 50;
 	        this.geometry = this.getGeometry(text);
 	        this.material = new THREE.MeshStandardMaterial({
@@ -514,14 +546,17 @@
 	            metalness: 0.5
 	        });
 	        this.mesh = new THREE.Mesh(this.geometry, this.material);
-	        this.size = this.getSize();
+	        this.size = this.getSize(1);
+	        this.setScale();
 	    }
 
 	    _createClass(GLText, [{
 	        key: "setText",
 	        value: function setText(text) {
-	            this.mesh.scale.x = this.mesh.scale.y = 1;
 	            this.mesh.geometry = this.getGeometry(text);
+	            this.mesh.scale.x = this.mesh.scale.y = 1;
+	            this.size = this.getSize();
+	            this.setScale();
 	        }
 	    }, {
 	        key: "getGeometry",
@@ -540,13 +575,15 @@
 	        }
 	    }, {
 	        key: "getSize",
-	        value: function getSize() {
+	        value: function getSize(forceRate) {
+	            var sizeRate = forceRate || this.nodeSize / 50;
 	            var box = new THREE.Box3().setFromObject(this.mesh);
-	            return {
-	                width: box.max.x - box.min.x,
-	                height: box.max.y - box.min.y,
-	                depth: box.max.z - box.min.z
+	            var ret = {
+	                width: (box.max.x - box.min.x) / sizeRate,
+	                height: (box.max.y - box.min.y) / sizeRate,
+	                depth: (box.max.z - box.min.z) / sizeRate
 	            };
+	            return ret;
 	        }
 	    }, {
 	        key: "getObject3D",
@@ -556,9 +593,9 @@
 	    }, {
 	        key: "setScale",
 	        value: function setScale() {
+	            var defaultSize = 50;
 	            var padding = 30;
-	            var idealWidth = 100 - padding;
-	            this.size = this.getSize();
+	            var idealWidth = defaultSize * 2 - padding;
 	            var scaleRate = idealWidth / Math.max(this.size.width, this.size.height * 1.5);
 	            this.getObject3D().scale.x = this.getObject3D().scale.y = scaleRate;
 	        }

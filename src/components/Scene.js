@@ -7,11 +7,14 @@ const ease = (from, to, rate = 6) => {
 }
 
 class Scene {
-    constructor (options) {
+    constructor (options, renderer) {
+        this.renderer = renderer
         // Adding Scene
         this.object = new THREE.Scene()
         // Adding Camera
         this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000)
+        // defining Handler of Dom Events
+        window.bindEvent = new THREEx.DomEvents(this.camera, this.renderer.domElement)
         // set camera status from localStorage
         this.loadStoredCameraDataFromLocalStorage()
         // Adding lights to Scene
@@ -29,6 +32,25 @@ class Scene {
         keyboard.bind('r e s e t c a m', e => {
             this.camera.position.set(0, 0, 0)
             this.camera.rotation.set(0, 0, 0)
+        })
+        // Mouse hover and click detect
+        window.addEventListener('mousemove', e => {
+            window.MOUSE.x = e.clientX
+            window.MOUSE.y = e.clientY
+            this.handleHover(e)
+        })
+        window.addEventListener('mousedown', e => {
+            window.MOUSE.down = true
+            window.MOUSE.downPos.x = e.clientX
+            window.MOUSE.downPos.y = e.clientY
+        })
+        window.addEventListener('mouseup', e => {
+            window.MOUSE.down = false
+            window.MOUSE.upPos.x = e.clientX
+            window.MOUSE.upPos.y = e.clientY
+        })
+        window.addEventListener('mousedown', e => {
+            this.handleClick(e)
         })
     }
     onResize () {

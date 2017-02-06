@@ -16,14 +16,18 @@ class Node {
         // Combining geometry and material
         this.mesh = new THREE.Mesh(this.geometry, this.material)
         // set text
-        this.addText('Customer')
+        this.addText('Application')
         // set Node's size and scale
         this.size = size
         this.setSize(size)
         // Set position of mesh
-        this.setPos(this.position)
+        this.setPos(this.position, 1)
+        // Binding mouse actions to Node
+        window.bindEvent.addEventListener(this.mesh, 'click', e => { this.onClick(e) }, false)
+        window.bindEvent.addEventListener(this.mesh, 'mouseover', e => { this.onHover(e) }, false)
+        window.bindEvent.addEventListener(this.mesh, 'mouseout', e => { this.onBlur(e) }, false)
     }
-    setPos (obj = {}) {
+    setPos (obj = {}, forceRate) {
         // Merging obj and current position together
         obj = Object.assign({}, this.position, obj)
         // check if it's string
@@ -32,20 +36,16 @@ class Node {
         if (typeof obj.z === 'string') obj.z = parseFloat(obj.z) + this.position.z
         // Setting mesh position
         this.getObject3D().position.set(obj.x, obj.y, obj.z)
-        this.text.getObject3D().position.set(
-            -(this.text.getSize().width / 2),
-            -(this.text.getSize().height / 2),
-            -(this.text.getSize().depth / 2),
-        )
+        const textSize = this.text.getSize(forceRate)
+        this.text.getObject3D().position.set(-(textSize.width / 2), -(textSize.height / 2), -(textSize.depth / 2))
         this.position = obj
     }
     addText (text) {
-        this.text = new GLText(text)
+        this.text = new GLText(text, this.size)
         this.getObject3D().add(this.text.getObject3D())
     }
     setText (text) {
         this.text.setText(text)
-        this.setSize(this.size)
         this.setPos()
     }
     getObject3D () {
@@ -54,7 +54,17 @@ class Node {
     setSize (size) {
         this.size = size
         this.getObject3D().scale.x = this.getObject3D().scale.y = size / 50
-        this.text.setScale()
+        this.text.nodeSize = size
+    }
+    // Binding Mouse Actions to Node
+    onClick (e) {
+
+    }
+    onHover (e) {
+
+    }
+    onBlur (e) {
+        
     }
 }
 

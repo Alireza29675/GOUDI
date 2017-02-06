@@ -1,25 +1,11 @@
 import Scene from './components/Scene'
 
-// Calculating mouse status
+// Initializing mouse status
 window.MOUSE = {
     x: 0, y: 0, down: false,
     downPos: {x: 0, y: 0},
     upPos: {x: 0, y: 0}
 }
-window.addEventListener('mousemove', e => {
-    window.MOUSE.x = e.clientX
-    window.MOUSE.y = e.clientY
-})
-window.addEventListener('mousedown', e => {
-    window.MOUSE.down = true
-    window.MOUSE.downPos.x = e.clientX
-    window.MOUSE.downPos.y = e.clientY
-})
-window.addEventListener('mouseup', e => {
-    window.MOUSE.down = false
-    window.MOUSE.upPos.x = e.clientX
-    window.MOUSE.upPos.y = e.clientY
-})
 
 // Goudi
 class Goudi {
@@ -33,8 +19,8 @@ class Goudi {
             H: window.innerHeight
         }
         // define the scene and renderer
-        this.scene = new Scene(this.options)
         this.renderer = this.makeRenderer()
+        this.scene = new Scene(this.options, this.renderer)
         // Responsive
         window.addEventListener('resize', this.onResize.bind(this))
         // start rendering
