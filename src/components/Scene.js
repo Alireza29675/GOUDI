@@ -22,10 +22,13 @@ class Scene {
         this.object.add(lights.topLight)
         this.object.add(lights.bottomLight)
         // Adding nodes to Scene
-        this.nodesManage = new NodesManage(this.object)
+        this.nodesManage = new NodesManage(this)
         this.nodesManage.addNode(200, 0, -1000)
         this.nodesManage.addNode(0, 0, -1000, 100)
         this.nodesManage.addNode(-200, 0, -1000)
+        // Set Focus Node
+        this.focusNode = null
+        this.wishCameraPosition = { x: 0, y: 0 }
         // add zoom out and in on mouse wheel
         window.addEventListener('mousewheel', e => { this.onMouseWheel(e) })
         // reset camera // DEBUGGING
@@ -37,7 +40,6 @@ class Scene {
         window.addEventListener('mousemove', e => {
             window.MOUSE.x = e.clientX
             window.MOUSE.y = e.clientY
-            this.handleHover(e)
         })
         window.addEventListener('mousedown', e => {
             window.MOUSE.down = true
@@ -49,19 +51,10 @@ class Scene {
             window.MOUSE.upPos.x = e.clientX
             window.MOUSE.upPos.y = e.clientY
         })
-        window.addEventListener('mousedown', e => {
-            this.handleClick(e)
-        })
     }
-    onResize () {
-        // Storing current position and rotation
-        const cameraPos = this.camera.position
-        const cameraRot = this.camera.rotation
-        // building a new camera
-        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000)
-        // pasting previous position and rotation
-        this.camera.position.set(cameraPos.x, cameraPos.y, cameraPos.z)
-        this.camera.rotation.set(cameraRot.x, cameraRot.y, cameraRot.z)
+    onResize (W, H) {
+        this.camera.aspect	= W / H
+		this.camera.updateProjectionMatrix()
     }
     onMouseWheel (e) {
         this.camera.position.z -= e.deltaY
@@ -91,20 +84,40 @@ class Scene {
             this.camera.rotation.x, // from
             (MOUSE.y - H/2) / H * 0.015 // to
         )
+        this.camera.position.x = ease (
+            this.camera.position.x, // from
+            this.wishCameraPosition.x // to
+        , 10)
+        this.camera.position.y = ease (
+            this.camera.position.y, // from
+            this.wishCameraPosition.y // to
+        , 10)
+    }
+    focusCameraOn (node) {
+        this.focusNode = node
+        this.wishCameraPosition = {
+            x: node.getObject3D().position.x,
+            y: node.getObject3D().position.y
+        }
     }
     storeCameraDataToLocalStorage () {
         // stringify and store camera position and rotation to localStorage
         localStorage.setItem('camera', JSON.stringify({
             position: {x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z},
-            rotation: {x: this.camera.rotation.x, y: this.camera.rotation.y, z: this.camera.rotation.z}
+            rotation: {x: this.camera.rotation.x, y: this.camera.rotation.y, z: this.camera.rotation.z},
+            wishCameraPosition: {x: this.wishCameraPosition.x, y: this.wishCameraPosition.y}
         }))
     }
     loadStoredCameraDataFromLocalStorage () {
         // if there was a camera item in localStorage set initial position and rotation of camera
         if (localStorage.getItem('camera') !== undefined) {
             const storedData = JSON.parse(localStorage.getItem('camera'))
-            this.camera.position.set(storedData.position.x, storedData.position.y, storedData.position.z)
-            this.camera.rotation.set(storedData.rotation.x, storedData.rotation.y, storedData.rotation.z)
+            if (storedData.position)
+                this.camera.position.set(storedData.position.x, storedData.position.y, storedData.position.z)
+            if (storedData.rotation)
+                this.camera.rotation.set(storedData.rotation.x, storedData.rotation.y, storedData.rotation.z)
+            if (storedData.wishCameraPosition)
+                this.wishCameraPosition = {x: storedData.wishCameraPosition.x, y: storedData.wishCameraPosition.y}
         }
     }
 }

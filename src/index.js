@@ -30,7 +30,7 @@ class Goudi {
         this.options.W = window.innerWidth
         this.options.H = window.innerHeight
         this.renderer.setSize(this.options.W, this.options.H)
-        this.scene.onResize()
+        this.scene.onResize(this.options.W, this.options.H)
     }
     makeRenderer () {
         // defining the renderer

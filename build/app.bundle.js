@@ -137,7 +137,7 @@
 	            this.options.W = window.innerWidth;
 	            this.options.H = window.innerHeight;
 	            this.renderer.setSize(this.options.W, this.options.H);
-	            this.scene.onResize();
+	            this.scene.onResize(this.options.W, this.options.H);
 	        }
 	    }, {
 	        key: 'makeRenderer',
@@ -223,10 +223,13 @@
 	        this.object.add(_Lights2.default.topLight);
 	        this.object.add(_Lights2.default.bottomLight);
 	        // Adding nodes to Scene
-	        this.nodesManage = new _NodesManage2.default(this.object);
+	        this.nodesManage = new _NodesManage2.default(this);
 	        this.nodesManage.addNode(200, 0, -1000);
 	        this.nodesManage.addNode(0, 0, -1000, 100);
 	        this.nodesManage.addNode(-200, 0, -1000);
+	        // Set Focus Node
+	        this.focusNode = null;
+	        this.wishCameraPosition = { x: 0, y: 0 };
 	        // add zoom out and in on mouse wheel
 	        window.addEventListener('mousewheel', function (e) {
 	            _this.onMouseWheel(e);
@@ -240,7 +243,6 @@
 	        window.addEventListener('mousemove', function (e) {
 	            window.MOUSE.x = e.clientX;
 	            window.MOUSE.y = e.clientY;
-	            _this.handleHover(e);
 	        });
 	        window.addEventListener('mousedown', function (e) {
 	            window.MOUSE.down = true;
@@ -252,22 +254,13 @@
 	            window.MOUSE.upPos.x = e.clientX;
 	            window.MOUSE.upPos.y = e.clientY;
 	        });
-	        window.addEventListener('mousedown', function (e) {
-	            _this.handleClick(e);
-	        });
 	    }
 
 	    _createClass(Scene, [{
 	        key: 'onResize',
-	        value: function onResize() {
-	            // Storing current position and rotation
-	            var cameraPos = this.camera.position;
-	            var cameraRot = this.camera.rotation;
-	            // building a new camera
-	            this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000);
-	            // pasting previous position and rotation
-	            this.camera.position.set(cameraPos.x, cameraPos.y, cameraPos.z);
-	            this.camera.rotation.set(cameraRot.x, cameraRot.y, cameraRot.z);
+	        value: function onResize(W, H) {
+	            this.camera.aspect = W / H;
+	            this.camera.updateProjectionMatrix();
 	        }
 	    }, {
 	        key: 'onMouseWheel',
@@ -299,6 +292,21 @@
 	            this.camera.rotation.x = ease(this.camera.rotation.x, // from
 	            (MOUSE.y - H / 2) / H * 0.015 // to
 	            );
+	            this.camera.position.x = ease(this.camera.position.x, // from
+	            this.wishCameraPosition.x // to
+	            , 10);
+	            this.camera.position.y = ease(this.camera.position.y, // from
+	            this.wishCameraPosition.y // to
+	            , 10);
+	        }
+	    }, {
+	        key: 'focusCameraOn',
+	        value: function focusCameraOn(node) {
+	            this.focusNode = node;
+	            this.wishCameraPosition = {
+	                x: node.getObject3D().position.x,
+	                y: node.getObject3D().position.y
+	            };
 	        }
 	    }, {
 	        key: 'storeCameraDataToLocalStorage',
@@ -306,7 +314,8 @@
 	            // stringify and store camera position and rotation to localStorage
 	            localStorage.setItem('camera', JSON.stringify({
 	                position: { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z },
-	                rotation: { x: this.camera.rotation.x, y: this.camera.rotation.y, z: this.camera.rotation.z }
+	                rotation: { x: this.camera.rotation.x, y: this.camera.rotation.y, z: this.camera.rotation.z },
+	                wishCameraPosition: { x: this.wishCameraPosition.x, y: this.wishCameraPosition.y }
 	            }));
 	        }
 	    }, {
@@ -315,8 +324,9 @@
 	            // if there was a camera item in localStorage set initial position and rotation of camera
 	            if (localStorage.getItem('camera') !== undefined) {
 	                var storedData = JSON.parse(localStorage.getItem('camera'));
-	                this.camera.position.set(storedData.position.x, storedData.position.y, storedData.position.z);
-	                this.camera.rotation.set(storedData.rotation.x, storedData.rotation.y, storedData.rotation.z);
+	                if (storedData.position) this.camera.position.set(storedData.position.x, storedData.position.y, storedData.position.z);
+	                if (storedData.rotation) this.camera.rotation.set(storedData.rotation.x, storedData.rotation.y, storedData.rotation.z);
+	                if (storedData.wishCameraPosition) this.wishCameraPosition = { x: storedData.wishCameraPosition.x, y: storedData.wishCameraPosition.y };
 	            }
 	        }
 	    }]);
@@ -383,8 +393,8 @@
 	            var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	            var size = arguments[3];
 
-	            var node = new _Node2.default(x, y, z, size);
-	            this.scene.add(node.getObject3D());
+	            var node = new _Node2.default(this.scene, x, y, z, size);
+	            this.scene.object.add(node.getObject3D());
 	            this.nodes.push(node);
 	            return node;
 	        }
@@ -416,17 +426,18 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Node = function () {
-	    function Node() {
-	        var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-	        var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	    function Node(scene) {
+	        var x = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	        var y = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
 	        var _this = this;
 
-	        var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-	        var size = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 50;
+	        var z = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+	        var size = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 50;
 
 	        _classCallCheck(this, Node);
 
+	        this.scene = scene;
 	        // Position object for storing current position
 	        this.position = { x: x, y: y, z: z };
 	        // Node Geometry
@@ -452,10 +463,10 @@
 	            _this.onClick(e);
 	        }, false);
 	        window.bindEvent.addEventListener(this.mesh, 'mouseover', function (e) {
-	            _this.onHover(e);
+	            _this.onMouseOver(e);
 	        }, false);
 	        window.bindEvent.addEventListener(this.mesh, 'mouseout', function (e) {
-	            _this.onBlur(e);
+	            _this.onMouseOut(e);
 	        }, false);
 	    }
 
@@ -501,17 +512,21 @@
 	            this.getObject3D().scale.x = this.getObject3D().scale.y = size / 50;
 	            this.text.nodeSize = size;
 	        }
-	        // Binding Mouse Actions to Node
+	        // Binding Events
 
 	    }, {
 	        key: 'onClick',
-	        value: function onClick(e) {}
+	        value: function onClick(e) {
+	            if (this.scene.focusNode !== this) {
+	                this.scene.focusCameraOn(this);
+	            }
+	        }
 	    }, {
-	        key: 'onHover',
-	        value: function onHover(e) {}
+	        key: 'onMouseOver',
+	        value: function onMouseOver(e) {}
 	    }, {
-	        key: 'onBlur',
-	        value: function onBlur(e) {}
+	        key: 'onMouseOut',
+	        value: function onMouseOut(e) {}
 	    }]);
 
 	    return Node;

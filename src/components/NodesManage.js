@@ -6,8 +6,8 @@ class NodesManage {
         this.scene = scene
     }
     addNode (x = 0, y = 0, z = 0, size) {
-        const node = new Node (x, y, z, size)
-        this.scene.add(node.getObject3D())
+        const node = new Node (this.scene, x, y, z, size)
+        this.scene.object.add(node.getObject3D())
         this.nodes.push(node)
         return node
     }
