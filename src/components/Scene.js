@@ -32,6 +32,7 @@ class Scene {
         this.nodesManage.connectNodeToNode(c, a)
         this.nodesManage.connectNodeToNode(c, b)
         this.nodesManage.connectNodeToNode(d, b)
+        this.nodesManage.connectNodeToPosition(d, {x: -100, y: 250, z: -1000})
         // Set Focus Node
         this.focusNode = null
         // add zoom out and in on mouse wheel

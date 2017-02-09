@@ -233,6 +233,7 @@
 	        this.nodesManage.connectNodeToNode(c, a);
 	        this.nodesManage.connectNodeToNode(c, b);
 	        this.nodesManage.connectNodeToNode(d, b);
+	        this.nodesManage.connectNodeToPosition(d, { x: -100, y: 250, z: -1000 });
 	        // Set Focus Node
 	        this.focusNode = null;
 	        // add zoom out and in on mouse wheel
@@ -416,22 +417,30 @@
 	            var deltaY = nodeTo.position.y - nodeFrom.position.y;
 	            var deltaZ = nodeTo.position.z - nodeFrom.position.z;
 	            var rotateZ = Math.atan2(deltaY, deltaX);
-	            var from = {
-	                x: nodeFrom.position.x + Math.cos(rotateZ) * nodeFrom.size,
-	                y: nodeFrom.position.y + Math.sin(rotateZ) * nodeFrom.size,
-	                z: nodeFrom.position.z
-	            };
 	            var to = {
 	                x: nodeTo.position.x + Math.cos(rotateZ - Math.PI) * nodeTo.size,
 	                y: nodeTo.position.y + Math.sin(rotateZ - Math.PI) * nodeTo.size,
 	                z: nodeTo.position.z
 	            };
-	            this.arrow = new _Arrow2.default(from, to);
-	            this.scene.object.add(this.arrow.getObject3D());
+	            var arrow = this.connectNodeToPosition(nodeFrom, to);
+	            return arrow;
 	        }
 	    }, {
 	        key: 'connectNodeToPosition',
-	        value: function connectNodeToPosition(nodeFrom, position) {}
+	        value: function connectNodeToPosition(nodeFrom, position) {
+	            var deltaX = position.x - nodeFrom.position.x;
+	            var deltaY = position.y - nodeFrom.position.y;
+	            var deltaZ = position.z - nodeFrom.position.z;
+	            var rotateZ = Math.atan2(deltaY, deltaX);
+	            var from = {
+	                x: nodeFrom.position.x + Math.cos(rotateZ) * nodeFrom.size,
+	                y: nodeFrom.position.y + Math.sin(rotateZ) * nodeFrom.size,
+	                z: nodeFrom.position.z
+	            };
+	            var arrow = new _Arrow2.default(from, position);
+	            this.scene.object.add(arrow.getObject3D());
+	            return arrow;
+	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {}
