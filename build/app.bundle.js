@@ -189,7 +189,7 @@
 
 	var _NodesManage2 = _interopRequireDefault(_NodesManage);
 
-	var _mousetrap = __webpack_require__(7);
+	var _mousetrap = __webpack_require__(9);
 
 	var _mousetrap2 = _interopRequireDefault(_mousetrap);
 
@@ -217,6 +217,7 @@
 	        // defining Handler of Dom Events
 	        window.bindEvent = new THREEx.DomEvents(this.camera, this.renderer.domElement);
 	        // set camera status from localStorage
+	        this.wishCameraPosition = { x: 0, y: 0 };
 	        this.loadStoredCameraDataFromLocalStorage();
 	        // Adding lights to Scene
 	        this.object.add(_Lights2.default.globalAmbient);
@@ -224,12 +225,16 @@
 	        this.object.add(_Lights2.default.bottomLight);
 	        // Adding nodes to Scene
 	        this.nodesManage = new _NodesManage2.default(this);
-	        this.nodesManage.addNode(200, 0, -1000);
-	        this.nodesManage.addNode(0, 0, -1000, 100);
-	        this.nodesManage.addNode(-200, 0, -1000);
+	        var a = this.nodesManage.addNode(200, -50, -1000);
+	        var b = this.nodesManage.addNode(0, 50, -1000, 100);
+	        var c = this.nodesManage.addNode(-200, -200, -1000);
+	        var d = this.nodesManage.addNode(-200, 200, -1000);
+	        this.nodesManage.connectNodeToNode(a, b);
+	        this.nodesManage.connectNodeToNode(c, a);
+	        this.nodesManage.connectNodeToNode(c, b);
+	        this.nodesManage.connectNodeToNode(d, b);
 	        // Set Focus Node
 	        this.focusNode = null;
-	        this.wishCameraPosition = { x: 0, y: 0 };
 	        // add zoom out and in on mouse wheel
 	        window.addEventListener('mousewheel', function (e) {
 	            _this.onMouseWheel(e);
@@ -270,6 +275,8 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            // Flow rendering to Node Management
+	            this.nodesManage.render();
 	            // Ease positions with animations relating to mouse movement
 	            this.easeParameters();
 	            // Store camera data in every frame
@@ -373,6 +380,10 @@
 
 	var _Node2 = _interopRequireDefault(_Node);
 
+	var _Arrow = __webpack_require__(7);
+
+	var _Arrow2 = _interopRequireDefault(_Arrow);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -398,6 +409,32 @@
 	            this.nodes.push(node);
 	            return node;
 	        }
+	    }, {
+	        key: 'connectNodeToNode',
+	        value: function connectNodeToNode(nodeFrom, nodeTo) {
+	            var deltaX = nodeTo.position.x - nodeFrom.position.x;
+	            var deltaY = nodeTo.position.y - nodeFrom.position.y;
+	            var deltaZ = nodeTo.position.z - nodeFrom.position.z;
+	            var rotateZ = Math.atan2(deltaY, deltaX);
+	            var from = {
+	                x: nodeFrom.position.x + Math.cos(rotateZ) * nodeFrom.size,
+	                y: nodeFrom.position.y + Math.sin(rotateZ) * nodeFrom.size,
+	                z: nodeFrom.position.z
+	            };
+	            var to = {
+	                x: nodeTo.position.x + Math.cos(rotateZ - Math.PI) * nodeTo.size,
+	                y: nodeTo.position.y + Math.sin(rotateZ - Math.PI) * nodeTo.size,
+	                z: nodeTo.position.z
+	            };
+	            this.arrow = new _Arrow2.default(from, to);
+	            this.scene.object.add(this.arrow.getObject3D());
+	        }
+	    }, {
+	        key: 'connectNodeToPosition',
+	        value: function connectNodeToPosition(nodeFrom, position) {}
+	    }, {
+	        key: 'render',
+	        value: function render() {}
 	    }]);
 
 	    return NodesManage;
@@ -523,10 +560,14 @@
 	        }
 	    }, {
 	        key: 'onMouseOver',
-	        value: function onMouseOver(e) {}
+	        value: function onMouseOver(e) {
+	            document.body.style.cursor = 'pointer';
+	        }
 	    }, {
 	        key: 'onMouseOut',
-	        value: function onMouseOut(e) {}
+	        value: function onMouseOut(e) {
+	            document.body.style.cursor = 'default';
+	        }
 	    }]);
 
 	    return Node;
@@ -623,6 +664,122 @@
 
 /***/ },
 /* 7 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Arrow = function () {
+	    function Arrow() {
+	        var from = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { x: 0, y: 0, z: 0 };
+	        var to = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { x: 0, y: 0, z: 0 };
+
+	        _classCallCheck(this, Arrow);
+
+	        this.from = from;
+	        this.to = to;
+	        this.arrowHeight = 20;
+	        this.arrow = new THREE.Object3D();
+	        this.material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+	        this.cone = this.getCone();
+	        this.cylinder = this.getCylinder();
+	        this.arrow.add(this.cone);
+	        this.arrow.add(this.cylinder);
+	        this.fix();
+	    }
+
+	    _createClass(Arrow, [{
+	        key: "setFrom",
+	        value: function setFrom(pos) {
+	            this.from = pos;
+	            this.fix();
+	        }
+	    }, {
+	        key: "setTo",
+	        value: function setTo(pos) {
+	            this.to = pos;
+	            this.fix();
+	        }
+	    }, {
+	        key: "fix",
+	        value: function fix() {
+	            var deltaX = this.to.x - this.from.x;
+	            var deltaY = this.to.y - this.from.y;
+	            var deltaZ = this.to.z - this.from.z;
+	            this.height = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2));
+	            this.cone.geometry.translate(0, (this.height - this.arrowHeight) / 2, 0);
+	            this.cylinder.geometry = this.getCylinderGeo();
+	            this.cylinder.geometry.translate(0, -this.arrowHeight / 2, 0);
+	            this.setX((this.to.x + this.from.x) / 2);
+	            this.setY((this.to.y + this.from.y) / 2);
+	            this.setZ((this.to.z + this.from.z) / 2);
+	            // ==========================================
+	            // ISSUE -> It just work for 2D Rotations now
+	            this.rotateZ(Math.atan2(deltaY, deltaX));
+	            // ==========================================
+	        }
+	    }, {
+	        key: "getCone",
+	        value: function getCone() {
+	            this.coneGeometry = new THREE.ConeGeometry(10, this.arrowHeight, 32);
+	            var mesh = new THREE.Mesh(this.coneGeometry, this.material);
+	            return mesh;
+	        }
+	    }, {
+	        key: "getCylinder",
+	        value: function getCylinder() {
+	            this.cylinderGeometry = this.getCylinderGeo();
+	            var mesh = new THREE.Mesh(this.cylinderGeometry, this.material);
+	            return mesh;
+	        }
+	    }, {
+	        key: "getCylinderGeo",
+	        value: function getCylinderGeo() {
+	            var height = (this.height || this.arrowHeight + 1) - this.arrowHeight;
+	            return new THREE.CylinderBufferGeometry(4, 4, height, 4);
+	        }
+	    }, {
+	        key: "getObject3D",
+	        value: function getObject3D() {
+	            return this.arrow;
+	        }
+	    }, {
+	        key: "setX",
+	        value: function setX(x) {
+	            this.getObject3D().position.x = x;
+	        }
+	    }, {
+	        key: "setY",
+	        value: function setY(y) {
+	            this.getObject3D().position.y = y;
+	        }
+	    }, {
+	        key: "setZ",
+	        value: function setZ(z) {
+	            this.getObject3D().position.z = z + 5;
+	        }
+	    }, {
+	        key: "rotateZ",
+	        value: function rotateZ(deg) {
+	            this.getObject3D().rotation.z = deg - Math.PI / 2;
+	        }
+	    }]);
+
+	    return Arrow;
+	}();
+
+	exports.default = Arrow;
+
+/***/ },
+/* 8 */,
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */

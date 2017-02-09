@@ -16,6 +16,7 @@ class Scene {
         // defining Handler of Dom Events
         window.bindEvent = new THREEx.DomEvents(this.camera, this.renderer.domElement)
         // set camera status from localStorage
+        this.wishCameraPosition = { x: 0, y: 0 }
         this.loadStoredCameraDataFromLocalStorage()
         // Adding lights to Scene
         this.object.add(lights.globalAmbient)
@@ -23,12 +24,16 @@ class Scene {
         this.object.add(lights.bottomLight)
         // Adding nodes to Scene
         this.nodesManage = new NodesManage(this)
-        this.nodesManage.addNode(200, 0, -1000)
-        this.nodesManage.addNode(0, 0, -1000, 100)
-        this.nodesManage.addNode(-200, 0, -1000)
+        const a = this.nodesManage.addNode(200, -50, -1000)
+        const b = this.nodesManage.addNode(0, 50, -1000, 100)
+        const c = this.nodesManage.addNode(-200, -200, -1000)
+        const d = this.nodesManage.addNode(-200, 200, -1000)
+        this.nodesManage.connectNodeToNode(a, b)
+        this.nodesManage.connectNodeToNode(c, a)
+        this.nodesManage.connectNodeToNode(c, b)
+        this.nodesManage.connectNodeToNode(d, b)
         // Set Focus Node
         this.focusNode = null
-        this.wishCameraPosition = { x: 0, y: 0 }
         // add zoom out and in on mouse wheel
         window.addEventListener('mousewheel', e => { this.onMouseWheel(e) })
         // reset camera // DEBUGGING
@@ -60,6 +65,8 @@ class Scene {
         this.camera.position.z -= e.deltaY
     }
     render () {
+        // Flow rendering to Node Management
+        this.nodesManage.render()
         // Ease positions with animations relating to mouse movement
         this.easeParameters()
         // Store camera data in every frame

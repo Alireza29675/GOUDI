@@ -64,10 +64,10 @@ class Node {
         }
     }
     onMouseOver (e) {
-
+        document.body.style.cursor = 'pointer'
     }
     onMouseOut (e) {
-        
+        document.body.style.cursor = 'default'
     }
 }
 
