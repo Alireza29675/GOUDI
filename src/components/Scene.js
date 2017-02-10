@@ -1,3 +1,4 @@
+import PropertiesPanel from './PropertiesPanel'
 import lights from './Lights'
 import NodesManage from './NodesManage'
 import keyboard from 'mousetrap'
@@ -11,6 +12,8 @@ class Scene {
         this.renderer = renderer
         // Adding Scene
         this.object = new THREE.Scene()
+        // Adding Properties Panel
+        this.panel = new PropertiesPanel(this)
         // Adding Camera
         this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000)
         // defining Handler of Dom Events

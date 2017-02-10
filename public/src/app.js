@@ -10,7 +10,7 @@ window.app = new App()
 // loading basic fonts
 window.GL_FONTS = {}
 const fontLoader = new THREE.FontLoader();
-fontLoader.load('droid_sans_regular.typeface.json', response => {
+fontLoader.load('./js/droid_sans_regular.typeface.json', response => {
     window.GL_FONTS["droid"] = response
     window.app.start()
 })

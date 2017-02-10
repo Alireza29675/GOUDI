@@ -1,8 +1,8 @@
 import GLText from './GLText'
 
 class Node {
-    constructor (scene, x = 0, y = 0, z = 0, size = 50) {
-        this.scene = scene
+    constructor (nodeManage, x = 0, y = 0, z = 0, size = 50) {
+        this.scene = nodeManage.scene
         // Position object for storing current position
         this.position = {x: x, y: y, z: z}
         // Node Geometry
@@ -25,6 +25,9 @@ class Node {
         this.setPos(this.position, 1)
         // Binding mouse actions to Node
         window.bindEvent.addEventListener(this.mesh, 'click', e => { this.onClick(e) }, false)
+        window.bindEvent.addEventListener(this.mesh, 'dblclick', e => { this.onDoubleClick(e) }, false)
+        window.bindEvent.addEventListener(this.mesh, 'mousedown', e => { this.onMouseDown(e) }, false)
+        window.bindEvent.addEventListener(this.mesh, 'mouseup', e => { this.onMouseUp(e) }, false)
         window.bindEvent.addEventListener(this.mesh, 'mouseover', e => { this.onMouseOver(e) }, false)
         window.bindEvent.addEventListener(this.mesh, 'mouseout', e => { this.onMouseOut(e) }, false)
     }
@@ -63,11 +66,20 @@ class Node {
             this.scene.focusCameraOn(this)
         }
     }
+    onDoubleClick (e) {
+        
+    }
     onMouseOver (e) {
         document.body.style.cursor = 'pointer'
     }
     onMouseOut (e) {
         document.body.style.cursor = 'default'
+    }
+    onMouseDown (e) {
+        
+    }
+    onMouseUp (e) {
+        
     }
 }
 

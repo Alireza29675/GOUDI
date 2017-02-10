@@ -76,7 +76,7 @@
 	// loading basic fonts
 	window.GL_FONTS = {};
 	var fontLoader = new THREE.FontLoader();
-	fontLoader.load('droid_sans_regular.typeface.json', function (response) {
+	fontLoader.load('./js/droid_sans_regular.typeface.json', function (response) {
 	    window.GL_FONTS["droid"] = response;
 	    window.app.start();
 	});
@@ -181,11 +181,15 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Lights = __webpack_require__(3);
+	var _PropertiesPanel = __webpack_require__(3);
+
+	var _PropertiesPanel2 = _interopRequireDefault(_PropertiesPanel);
+
+	var _Lights = __webpack_require__(4);
 
 	var _Lights2 = _interopRequireDefault(_Lights);
 
-	var _NodesManage = __webpack_require__(4);
+	var _NodesManage = __webpack_require__(5);
 
 	var _NodesManage2 = _interopRequireDefault(_NodesManage);
 
@@ -212,6 +216,8 @@
 	        this.renderer = renderer;
 	        // Adding Scene
 	        this.object = new THREE.Scene();
+	        // Adding Properties Panel
+	        this.panel = new _PropertiesPanel2.default(this);
 	        // Adding Camera
 	        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000);
 	        // defining Handler of Dom Events
@@ -353,6 +359,37 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var PropertiesPanel = function () {
+	    function PropertiesPanel(scene) {
+	        _classCallCheck(this, PropertiesPanel);
+
+	        this.scene = scene;
+	    }
+
+	    _createClass(PropertiesPanel, [{
+	        key: "generateDOM",
+	        value: function generateDOM() {}
+	    }]);
+
+	    return PropertiesPanel;
+	}();
+
+	exports.default = PropertiesPanel;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
 	// define lights
 	var lights = {
 	    globalAmbient: new THREE.AmbientLight(0xffffff, 0.5),
@@ -366,7 +403,7 @@
 	exports.default = lights;
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -377,11 +414,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Node = __webpack_require__(5);
+	var _Node = __webpack_require__(6);
 
 	var _Node2 = _interopRequireDefault(_Node);
 
-	var _Arrow = __webpack_require__(7);
+	var _Arrow = __webpack_require__(8);
 
 	var _Arrow2 = _interopRequireDefault(_Arrow);
 
@@ -405,7 +442,7 @@
 	            var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	            var size = arguments[3];
 
-	            var node = new _Node2.default(this.scene, x, y, z, size);
+	            var node = new _Node2.default(this, x, y, z, size);
 	            this.scene.object.add(node.getObject3D());
 	            this.nodes.push(node);
 	            return node;
@@ -452,7 +489,7 @@
 	exports.default = NodesManage;
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -463,7 +500,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _GLText = __webpack_require__(6);
+	var _GLText = __webpack_require__(7);
 
 	var _GLText2 = _interopRequireDefault(_GLText);
 
@@ -472,7 +509,7 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Node = function () {
-	    function Node(scene) {
+	    function Node(nodeManage) {
 	        var x = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 	        var y = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
@@ -483,7 +520,7 @@
 
 	        _classCallCheck(this, Node);
 
-	        this.scene = scene;
+	        this.scene = nodeManage.scene;
 	        // Position object for storing current position
 	        this.position = { x: x, y: y, z: z };
 	        // Node Geometry
@@ -507,6 +544,15 @@
 	        // Binding mouse actions to Node
 	        window.bindEvent.addEventListener(this.mesh, 'click', function (e) {
 	            _this.onClick(e);
+	        }, false);
+	        window.bindEvent.addEventListener(this.mesh, 'dblclick', function (e) {
+	            _this.onDoubleClick(e);
+	        }, false);
+	        window.bindEvent.addEventListener(this.mesh, 'mousedown', function (e) {
+	            _this.onMouseDown(e);
+	        }, false);
+	        window.bindEvent.addEventListener(this.mesh, 'mouseup', function (e) {
+	            _this.onMouseUp(e);
 	        }, false);
 	        window.bindEvent.addEventListener(this.mesh, 'mouseover', function (e) {
 	            _this.onMouseOver(e);
@@ -568,6 +614,9 @@
 	            }
 	        }
 	    }, {
+	        key: 'onDoubleClick',
+	        value: function onDoubleClick(e) {}
+	    }, {
 	        key: 'onMouseOver',
 	        value: function onMouseOver(e) {
 	            document.body.style.cursor = 'pointer';
@@ -577,6 +626,12 @@
 	        value: function onMouseOut(e) {
 	            document.body.style.cursor = 'default';
 	        }
+	    }, {
+	        key: 'onMouseDown',
+	        value: function onMouseDown(e) {}
+	    }, {
+	        key: 'onMouseUp',
+	        value: function onMouseUp(e) {}
 	    }]);
 
 	    return Node;
@@ -585,7 +640,7 @@
 	exports.default = Node;
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -672,7 +727,7 @@
 	exports.default = GLText;
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -752,7 +807,7 @@
 	        key: "getCylinderGeo",
 	        value: function getCylinderGeo() {
 	            var height = (this.height || this.arrowHeight + 1) - this.arrowHeight;
-	            return new THREE.CylinderBufferGeometry(4, 4, height, 4);
+	            return new THREE.CylinderBufferGeometry(4, 4, height, 10);
 	        }
 	    }, {
 	        key: "getObject3D",
@@ -787,7 +842,6 @@
 	exports.default = Arrow;
 
 /***/ },
-/* 8 */,
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 

@@ -47,7 +47,7 @@ class Arrow {
     }
     getCylinderGeo () {
         const height = (this.height || this.arrowHeight+1) - this.arrowHeight
-        return new THREE.CylinderBufferGeometry( 4, 4, height, 4 )
+        return new THREE.CylinderBufferGeometry(4, 4, height, 10)
     }
     getObject3D () {
         return this.arrow
