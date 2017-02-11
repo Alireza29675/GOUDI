@@ -10,6 +10,7 @@ module.exports = {
                 test: /\.css$/,
                 loader: "style!css"
             },
+            { test: /\.(woff|png|jpg|gif)$/, loader: 'url-loader?limit=1000000' },
             {
                 test: /\.js?$/,
                 loader: "babel-loader",
