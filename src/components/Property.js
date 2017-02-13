@@ -12,7 +12,7 @@ class Property {
     constructor (name, type, options, onchange) {
         this.options = Object.assign({}, options, {
             name: name,
-            type: type,
+            type: type || 'readonly',
             label: options.label || name
         })
         this.onchange = onchange
@@ -60,12 +60,14 @@ class Property {
         this.value = null
     }
     // ==== types of property ====
-    setTextContents () {
+    setTextContents (readonly = false) {
         this.changebarContent = create('input')
         this.changebarContent.type = 'text'
         this.changebarContent.value = this.options.value || ''
-        this.changebarContent.onkeyup = () => {
-            this.onchange(this.changebarContent.value)
+        if (!readonly) {
+            this.changebarContent.onkeyup = () => { this.onchange(this.options.name, this.changebarContent.value) }
+        } else {
+            this.changebarContent.disabled = true
         }
     }
     setNumberContents () {
@@ -75,8 +77,8 @@ class Property {
         this.changebarContent.max = this.options.max || ''
         this.changebarContent.step = this.options.step || ''
         this.changebarContent.value = this.options.value || ''
-        this.changebarContent.onchange = () => {
-            this.onchange(this.changebarContent.value)
+        this.changebarContent.onchange = this.changebarContent.onmouseup = () => {
+            this.onchange(this.options.name, this.changebarContent.value)
         }
     }
     setRangeContents () {
@@ -89,11 +91,11 @@ class Property {
         this.valueContent = create('input')
         this.valueContent.disabled = true
         this._value = this.valueContent.value = this.changebarContent.value
-        this.changebarContent.onmousemove = () => {
+        this.changebarContent.onmousemove = this.changebarContent.onclick = () => {
             if (this._value !== this.changebarContent.value) {
                 this._value = this.valueContent.value
                 this.valueContent.value = this.changebarContent.value
-                this.onchange(this.changebarContent.value)
+                this.onchange(this.options.name, this.changebarContent.value)
             }
         }
     }
@@ -101,7 +103,7 @@ class Property {
         this.changebarContent = create('button')
         this.changebarContent.innerHTML = 'Do it!'
         this.changebarContent.onclick = (e) => {
-            this.onchange(e)
+            this.onchange(this.options.name, e)
         }
     }
     setSelectContents () {
@@ -114,8 +116,11 @@ class Property {
         }
         this.changebarContent.value = this.options.value || ''
         this.changebarContent.onchange = () => {
-            this.onchange(this.changebarContent.value)
+            this.onchange(this.options.name, this.changebarContent.value)
         }
+    }
+    setReadonlyContents () {
+        this.setTextContents(true)
     }
 }
 

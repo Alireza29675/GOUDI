@@ -181,10 +181,6 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _PropertiesPanel = __webpack_require__(3);
-
-	var _PropertiesPanel2 = _interopRequireDefault(_PropertiesPanel);
-
 	var _Lights = __webpack_require__(10);
 
 	var _Lights2 = _interopRequireDefault(_Lights);
@@ -216,8 +212,6 @@
 	        this.renderer = renderer;
 	        // Adding Scene
 	        this.object = new THREE.Scene();
-	        // Adding Properties Panel
-	        this.panel = new _PropertiesPanel2.default(this);
 	        // Adding Camera
 	        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000);
 	        // defining Handler of Dom Events
@@ -239,7 +233,7 @@
 	        this.nodesManage.connectNodeToNode(c, a);
 	        this.nodesManage.connectNodeToNode(c, b);
 	        this.nodesManage.connectNodeToNode(d, b);
-	        this.nodesManage.connectNodeToPosition(d, { x: -100, y: 250, z: -1000 });
+	        this.nodesManage.connectNodeToPosition(d, { x: -100, y: 250, z: 0 });
 	        // Set Focus Node
 	        this.focusNode = null;
 	        // add zoom out and in on mouse wheel
@@ -317,6 +311,7 @@
 	        key: 'focusCameraOn',
 	        value: function focusCameraOn(node) {
 	            this.focusNode = node;
+	            this.nodesManage.onFocusOnNode(node);
 	            this.wishCameraPosition = {
 	                x: node.getObject3D().position.x,
 	                y: node.getObject3D().position.y
@@ -381,46 +376,77 @@
 	};
 
 	var PropertiesPanel = function () {
-	    function PropertiesPanel(scene) {
+	    function PropertiesPanel(nodesManage) {
 	        _classCallCheck(this, PropertiesPanel);
 
 	        // Define scene and panel
-	        this.scene = scene;
+	        this.nodesManage = nodesManage;
+	        this.panelHeader = {
+	            icon: get('.panel > .header > i')[0],
+	            title: get('.panel > .header > span')[0]
+	        };
 	        this.panel = get('.panel > .table')[0];
-
 	        // reseting panel for first use
+	        this.panelProperties = [];
 	        this.resetPanel();
-
-	        // add some properties
-	        this.addProperty('Name', 'text', { value: 'Application' }, function (value) {
-	            console.log(value);
-	        });
-	        this.addProperty('size', 'range', { label: 'Element Size', min: 20, max: 40, step: 2, value: 20 }, function (value) {
-	            console.log(value);
-	        });
-	        this.addProperty('gender', 'select', {
-	            options: [{ label: 'Male', value: 1 }, { label: 'Female', value: 2 }, { label: 'Other', value: 0 }],
-	            value: 2
-	        }, function (value) {
-	            console.log(value);
-	        });
-	        this.addProperty('Default Size', 'number', { min: 50, value: 100 }, function (value) {
-	            console.log(value);
-	        });
-	        this.addProperty('Toggle', 'button', {}, function () {
-	            console.log('tapped!');
-	        });
 	    }
 
 	    _createClass(PropertiesPanel, [{
+	        key: 'focus',
+	        value: function focus(node) {
+	            var props = node.props;
+	            this.panelHeader.title.innerHTML = props.text.value;
+	            this.resetPanel();
+	            for (var property in props) {
+	                var _props$property = props[property],
+	                    label = _props$property.label,
+	                    type = _props$property.type,
+	                    value = _props$property.value,
+	                    options = _props$property.options;
+
+	                this.addProperty(property, type, Object.assign({}, options, { label: label || property, value: value }), function (prop, value) {
+	                    if (node['setProperty' + prop.capitalize()] !== undefined) node['setProperty' + prop.capitalize()](value);
+	                });
+	            }
+	        }
+	    }, {
 	        key: 'resetPanel',
 	        value: function resetPanel() {
+	            // freeing up memory
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = this.panelProperties[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var panelProperty = _step.value;
+
+	                    panelProperty.destroy();
+	                    panelProperty = null;
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+
+	            this.panelProperties = [];
 	            this.panel.innerHTML = '';
 	        }
 	    }, {
 	        key: 'addProperty',
 	        value: function addProperty(name, type, options, onchange) {
 	            var prop = new _Property2.default(name, type, options, onchange);
+	            this.panelProperties.push(prop);
 	            this.panel.appendChild(prop.getElement());
 	            return prop;
 	        }
@@ -808,7 +834,9 @@
 	};
 	// Changing positions and etc
 	lights.topLight.position.y = 5000;
+	lights.topLight.position.z = 1000;
 	lights.bottomLight.position.y = -5000;
+	lights.bottomLight.position.z = 1000;
 	// exporting all of them
 	exports.default = lights;
 
@@ -823,6 +851,10 @@
 	});
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _PropertiesPanel = __webpack_require__(3);
+
+	var _PropertiesPanel2 = _interopRequireDefault(_PropertiesPanel);
 
 	var _Node = __webpack_require__(12);
 
@@ -842,6 +874,8 @@
 
 	        this.nodes = [];
 	        this.scene = scene;
+	        // Adding Properties Panel
+	        this.panel = new _PropertiesPanel2.default(this);
 	    }
 
 	    _createClass(NodesManage, [{
@@ -858,11 +892,15 @@
 	            return node;
 	        }
 	    }, {
+	        key: 'onFocusOnNode',
+	        value: function onFocusOnNode(node) {
+	            this.panel.focus(node);
+	        }
+	    }, {
 	        key: 'connectNodeToNode',
 	        value: function connectNodeToNode(nodeFrom, nodeTo) {
 	            var deltaX = nodeTo.position.x - nodeFrom.position.x;
 	            var deltaY = nodeTo.position.y - nodeFrom.position.y;
-	            var deltaZ = nodeTo.position.z - nodeFrom.position.z;
 	            var rotateZ = Math.atan2(deltaY, deltaX);
 	            var to = {
 	                x: nodeTo.position.x + Math.cos(rotateZ - Math.PI) * nodeTo.size,
@@ -931,8 +969,37 @@
 	        _classCallCheck(this, Node);
 
 	        this.scene = nodeManage.scene;
-	        // Position object for storing current position
-	        this.position = { x: x, y: y, z: z };
+	        // set props of node
+	        this.props = {
+	            id: {
+	                value: 1
+	            },
+	            text: {
+	                label: 'Text',
+	                type: 'text',
+	                value: 'Eventum'
+	            },
+	            initialSize: {
+	                label: 'Initial Size',
+	                type: 'range',
+	                options: {
+	                    min: 50,
+	                    max: 100
+	                },
+	                value: 50
+	            },
+	            x: {
+	                label: 'Position x',
+	                type: 'number',
+	                value: x
+	            },
+	            y: {
+	                label: 'Position y',
+	                type: 'number',
+	                options: { step: 0.1 },
+	                value: y
+	            }
+	        };
 	        // Node Geometry
 	        this.geometry = new THREE.SphereGeometry(50, 50, 50);
 	        // Node Material
@@ -945,12 +1012,16 @@
 	        // Combining geometry and material
 	        this.mesh = new THREE.Mesh(this.geometry, this.material);
 	        // set text
-	        this.addText('Application');
+	        this.addText(this.props.text.value);
 	        // set Node's size and scale
 	        this.size = size;
 	        this.setSize(size);
 	        // Set position of mesh
-	        this.setPos(this.position, 1);
+	        this.setPos({
+	            x: this.props.x.value,
+	            y: this.props.y.value,
+	            z: 0
+	        }, 1);
 	        // Binding mouse actions to Node
 	        window.bindEvent.addEventListener(this.mesh, 'click', function (e) {
 	            _this.onClick(e);
@@ -1010,7 +1081,7 @@
 	    }, {
 	        key: 'setSize',
 	        value: function setSize(size) {
-	            this.size = size;
+	            this.size = size || this.size;
 	            this.getObject3D().scale.x = this.getObject3D().scale.y = size / 50;
 	            this.text.nodeSize = size;
 	        }
@@ -1042,6 +1113,27 @@
 	    }, {
 	        key: 'onMouseUp',
 	        value: function onMouseUp(e) {}
+
+	        // Properties set
+
+	    }, {
+	        key: 'setPropertyText',
+	        value: function setPropertyText(value) {
+	            this.props.text.value = value;
+	            document.querySelector('.panel > .header > span').innerHTML = value;
+	            this.setText(value);
+	        }
+	    }, {
+	        key: 'setPropertyX',
+	        value: function setPropertyX(value) {
+	            this.props.x.value = value;
+	            this.setPos({ x: parseFloat(value) });
+	        }
+	    }, {
+	        key: 'setPropertyY',
+	        value: function setPropertyY(value) {
+	            console.log(value);
+	        }
 	    }]);
 
 	    return Node;
@@ -1053,7 +1145,7 @@
 /* 13 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -1069,19 +1161,20 @@
 
 	        this.nodeSize = nodeSize;
 	        this.storedRadius = 50;
-	        this.geometry = this.getGeometry(text);
 	        this.material = new THREE.MeshStandardMaterial({
 	            color: 0xffffff,
 	            roughness: 0.8,
-	            metalness: 0.5
+	            metalness: 0.5,
+	            opacity: 0
 	        });
+	        this.geometry = this.getGeometry(text);
 	        this.mesh = new THREE.Mesh(this.geometry, this.material);
 	        this.size = this.getSize(1);
 	        this.setScale();
 	    }
 
 	    _createClass(GLText, [{
-	        key: "setText",
+	        key: 'setText',
 	        value: function setText(text) {
 	            this.mesh.geometry = this.getGeometry(text);
 	            this.mesh.scale.x = this.mesh.scale.y = 1;
@@ -1089,8 +1182,14 @@
 	            this.setScale();
 	        }
 	    }, {
-	        key: "getGeometry",
+	        key: 'getGeometry',
 	        value: function getGeometry(text) {
+	            if (text === '' || text === undefined) {
+	                text = '.';
+	                this.material.transparent = true;
+	            } else {
+	                this.material.transparent = false;
+	            }
 	            var geometry = new THREE.TextGeometry(text, {
 	                font: window.GL_FONTS.droid,
 	                height: 5,
@@ -1104,7 +1203,7 @@
 	            return geometry;
 	        }
 	    }, {
-	        key: "getSize",
+	        key: 'getSize',
 	        value: function getSize(forceRate) {
 	            var sizeRate = forceRate || this.nodeSize / 50;
 	            var box = new THREE.Box3().setFromObject(this.mesh);
@@ -1116,12 +1215,12 @@
 	            return ret;
 	        }
 	    }, {
-	        key: "getObject3D",
+	        key: 'getObject3D',
 	        value: function getObject3D() {
 	            return this.mesh;
 	        }
 	    }, {
-	        key: "setScale",
+	        key: 'setScale',
 	        value: function setScale() {
 	            var defaultSize = 50;
 	            var padding = 30;
@@ -2325,7 +2424,7 @@
 
 	        this.options = Object.assign({}, options, {
 	            name: name,
-	            type: type,
+	            type: type || 'readonly',
 	            label: options.label || name
 	        });
 	        this.onchange = onchange;
@@ -2387,12 +2486,18 @@
 	        value: function setTextContents() {
 	            var _this = this;
 
+	            var readonly = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
 	            this.changebarContent = create('input');
 	            this.changebarContent.type = 'text';
 	            this.changebarContent.value = this.options.value || '';
-	            this.changebarContent.onkeyup = function () {
-	                _this.onchange(_this.changebarContent.value);
-	            };
+	            if (!readonly) {
+	                this.changebarContent.onkeyup = function () {
+	                    _this.onchange(_this.options.name, _this.changebarContent.value);
+	                };
+	            } else {
+	                this.changebarContent.disabled = true;
+	            }
 	        }
 	    }, {
 	        key: 'setNumberContents',
@@ -2405,8 +2510,8 @@
 	            this.changebarContent.max = this.options.max || '';
 	            this.changebarContent.step = this.options.step || '';
 	            this.changebarContent.value = this.options.value || '';
-	            this.changebarContent.onchange = function () {
-	                _this2.onchange(_this2.changebarContent.value);
+	            this.changebarContent.onchange = this.changebarContent.onmouseup = function () {
+	                _this2.onchange(_this2.options.name, _this2.changebarContent.value);
 	            };
 	        }
 	    }, {
@@ -2423,11 +2528,11 @@
 	            this.valueContent = create('input');
 	            this.valueContent.disabled = true;
 	            this._value = this.valueContent.value = this.changebarContent.value;
-	            this.changebarContent.onmousemove = function () {
+	            this.changebarContent.onmousemove = this.changebarContent.onclick = function () {
 	                if (_this3._value !== _this3.changebarContent.value) {
 	                    _this3._value = _this3.valueContent.value;
 	                    _this3.valueContent.value = _this3.changebarContent.value;
-	                    _this3.onchange(_this3.changebarContent.value);
+	                    _this3.onchange(_this3.options.name, _this3.changebarContent.value);
 	                }
 	            };
 	        }
@@ -2439,7 +2544,7 @@
 	            this.changebarContent = create('button');
 	            this.changebarContent.innerHTML = 'Do it!';
 	            this.changebarContent.onclick = function (e) {
-	                _this4.onchange(e);
+	                _this4.onchange(_this4.options.name, e);
 	            };
 	        }
 	    }, {
@@ -2478,8 +2583,13 @@
 
 	            this.changebarContent.value = this.options.value || '';
 	            this.changebarContent.onchange = function () {
-	                _this5.onchange(_this5.changebarContent.value);
+	                _this5.onchange(_this5.options.name, _this5.changebarContent.value);
 	            };
+	        }
+	    }, {
+	        key: 'setReadonlyContents',
+	        value: function setReadonlyContents() {
+	            this.setTextContents(true);
 	        }
 	    }]);
 

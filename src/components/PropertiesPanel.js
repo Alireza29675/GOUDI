@@ -9,43 +9,41 @@ const get = (query) => {
 }
 
 class PropertiesPanel {
-    constructor (scene) {
+    constructor (nodesManage) {
         // Define scene and panel
-        this.scene = scene
+        this.nodesManage = nodesManage
+        this.panelHeader = {
+            icon: get('.panel > .header > i')[0],
+            title: get('.panel > .header > span')[0]
+        }
         this.panel = get('.panel > .table')[0]
-
         // reseting panel for first use
+        this.panelProperties = []
         this.resetPanel()
-
-        // add some properties
-        this.addProperty('Name', 'text', {value: 'Application'}, (value)=>{
-            console.log(value)
-        })
-        this.addProperty('size', 'range', {label: 'Element Size', min:20, max:40, step:2, value:20}, (value)=>{
-            console.log(value)
-        })
-        this.addProperty('gender', 'select', {
-                options: [
-                    {label: 'Male', value: 1},
-                    {label: 'Female', value: 2},
-                    {label: 'Other', value: 0}
-                ],
-                value: 2
-            }, (value) => {
-                console.log(value)
-        })
-        this.addProperty('Default Size', 'number', {min: 50, value: 100}, (value) => {
-            console.log(value)
-        })
-        this.addProperty('Toggle', 'button', {}, () => {
-            console.log('tapped!')
-        })
+    }
+    focus (node) {
+        const props = node.props
+        this.panelHeader.title.innerHTML = props.text.value
+        this.resetPanel()
+        for (let property in props) {
+            const { label, type, value, options } = props[ property ]
+            this.addProperty(property, type, Object.assign({}, options, { label: label || property, value: value }), (prop, value) => {
+                if (node['setProperty' + prop.capitalize()] !== undefined) node['setProperty' + prop.capitalize()](value)
+            })
+        }
     }
     resetPanel () {
+        // freeing up memory
+        for (let panelProperty of this.panelProperties) {
+            panelProperty.destroy()
+            panelProperty = null
+        }
+        this.panelProperties = []
         this.panel.innerHTML = ''
     }
     addProperty (name, type, options, onchange) {
         const prop = new Property(name, type, options, onchange)
+        this.panelProperties.push(prop)
         this.panel.appendChild(prop.getElement())
         return prop
     }

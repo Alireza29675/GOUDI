@@ -2,12 +2,13 @@ class GLText {
     constructor (text, nodeSize) {
         this.nodeSize = nodeSize
         this.storedRadius = 50
-        this.geometry = this.getGeometry(text)
         this.material = new THREE.MeshStandardMaterial({
             color: 0xffffff,
             roughness: 0.8,
-            metalness: 0.5
+            metalness: 0.5,
+            opacity: 0
         })
+        this.geometry = this.getGeometry(text)
         this.mesh = new THREE.Mesh(this.geometry, this.material)
         this.size = this.getSize(1)
         this.setScale()
@@ -19,6 +20,12 @@ class GLText {
         this.setScale ()
     }
     getGeometry (text) {
+        if (text === '' || text === undefined) {
+            text = '.'
+            this.material.transparent = true
+        } else {
+            this.material.transparent = false
+        }
         const geometry = new THREE.TextGeometry(text, {
             font: window.GL_FONTS.droid,
             height: 5,

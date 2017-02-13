@@ -1,4 +1,3 @@
-import PropertiesPanel from './PropertiesPanel'
 import lights from './Lights'
 import NodesManage from './NodesManage'
 import keyboard from 'mousetrap'
@@ -12,8 +11,6 @@ class Scene {
         this.renderer = renderer
         // Adding Scene
         this.object = new THREE.Scene()
-        // Adding Properties Panel
-        this.panel = new PropertiesPanel(this)
         // Adding Camera
         this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000)
         // defining Handler of Dom Events
@@ -35,7 +32,7 @@ class Scene {
         this.nodesManage.connectNodeToNode(c, a)
         this.nodesManage.connectNodeToNode(c, b)
         this.nodesManage.connectNodeToNode(d, b)
-        this.nodesManage.connectNodeToPosition(d, {x: -100, y: 250, z: -1000})
+        this.nodesManage.connectNodeToPosition(d, {x: -100, y: 250, z: 0 })
         // Set Focus Node
         this.focusNode = null
         // add zoom out and in on mouse wheel
@@ -106,6 +103,7 @@ class Scene {
     }
     focusCameraOn (node) {
         this.focusNode = node
+        this.nodesManage.onFocusOnNode(node)
         this.wishCameraPosition = {
             x: node.getObject3D().position.x,
             y: node.getObject3D().position.y

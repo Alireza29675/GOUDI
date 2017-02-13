@@ -3,8 +3,37 @@ import GLText from './GLText'
 class Node {
     constructor (nodeManage, x = 0, y = 0, z = 0, size = 50) {
         this.scene = nodeManage.scene
-        // Position object for storing current position
-        this.position = {x: x, y: y, z: z}
+        // set props of node
+        this.props = {
+            id: {
+                value: 1
+            },
+            text: {
+                label: 'Text',
+                type: 'text',
+                value: 'Eventum'
+            },
+            initialSize: {
+                label: 'Initial Size',
+                type: 'range',
+                options: {
+                    min: 50,
+                    max: 100
+                },
+                value: 50
+            },
+            x: {
+                label: 'Position x',
+                type: 'number',
+                value: x
+            },
+            y: {
+                label: 'Position y',
+                type: 'number',
+                options: { step: 0.1 },
+                value: y
+            }
+        }
         // Node Geometry
         this.geometry = new THREE.SphereGeometry(50, 50, 50)
         // Node Material
@@ -17,12 +46,16 @@ class Node {
         // Combining geometry and material
         this.mesh = new THREE.Mesh(this.geometry, this.material)
         // set text
-        this.addText('Application')
+        this.addText(this.props.text.value)
         // set Node's size and scale
         this.size = size
         this.setSize(size)
         // Set position of mesh
-        this.setPos(this.position, 1)
+        this.setPos({
+            x: this.props.x.value,
+            y: this.props.y.value,
+            z: 0
+        }, 1)
         // Binding mouse actions to Node
         window.bindEvent.addEventListener(this.mesh, 'click', e => { this.onClick(e) }, false)
         window.bindEvent.addEventListener(this.mesh, 'dblclick', e => { this.onDoubleClick(e) }, false)
@@ -56,7 +89,7 @@ class Node {
         return this.mesh
     }
     setSize (size) {
-        this.size = size
+        this.size = size || this.size
         this.getObject3D().scale.x = this.getObject3D().scale.y = size / 50
         this.text.nodeSize = size
     }
@@ -80,6 +113,20 @@ class Node {
     }
     onMouseUp (e) {
         
+    }
+
+    // Properties set
+    setPropertyText (value) {
+        this.props.text.value = value
+        document.querySelector('.panel > .header > span').innerHTML = value
+        this.setText(value)
+    }
+    setPropertyX (value) {
+        this.props.x.value = value
+        this.setPos({x: parseFloat(value)})
+    }
+    setPropertyY (value) {
+        console.log(value)
     }
 }
 

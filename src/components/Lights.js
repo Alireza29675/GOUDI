@@ -6,6 +6,8 @@ const lights = {
 }
 // Changing positions and etc
 lights.topLight.position.y = 5000
+lights.topLight.position.z = 1000
 lights.bottomLight.position.y = -5000
+lights.bottomLight.position.z = 1000
 // exporting all of them
 export default lights

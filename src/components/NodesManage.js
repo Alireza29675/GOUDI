@@ -1,3 +1,4 @@
+import PropertiesPanel from './PropertiesPanel'
 import Node from './Node'
 import Arrow from './Arrow'
 
@@ -5,6 +6,8 @@ class NodesManage {
     constructor (scene) {
         this.nodes = []
         this.scene = scene
+        // Adding Properties Panel
+        this.panel = new PropertiesPanel(this)
     }
     addNode (x = 0, y = 0, z = 0, size) {
         const node = new Node (this, x, y, z, size)
@@ -12,10 +15,12 @@ class NodesManage {
         this.nodes.push(node)
         return node
     }
+    onFocusOnNode (node) {
+        this.panel.focus(node)
+    }
     connectNodeToNode(nodeFrom, nodeTo) {
         const deltaX = nodeTo.position.x - nodeFrom.position.x
         const deltaY = nodeTo.position.y - nodeFrom.position.y
-        const deltaZ = nodeTo.position.z - nodeFrom.position.z
         const rotateZ = Math.atan2(deltaY, deltaX)
         const to = {
             x: nodeTo.position.x + (Math.cos(rotateZ - Math.PI) * nodeTo.size),
