@@ -8,6 +8,7 @@ const ease = (from, to, rate = 6) => {
 
 class Scene {
     constructor (options, renderer) {
+        this.frame = 0
         this.renderer = renderer
         // Adding Scene
         this.object = new THREE.Scene()
@@ -24,10 +25,30 @@ class Scene {
         this.object.add(lights.bottomLight)
         // Adding nodes to Scene
         this.nodesManage = new NodesManage(this)
-        const a = this.nodesManage.addNode(200, -50, -1000)
-        const b = this.nodesManage.addNode(0, 50, -1000, 100)
-        const c = this.nodesManage.addNode(-200, -200, -1000)
-        const d = this.nodesManage.addNode(-200, 200, -1000)
+        const a = this.nodesManage.addNode({
+            text: 'Programming',
+            x: 200,
+            y: -50,
+            initialSize: 50
+        })
+        const b = this.nodesManage.addNode({
+            text: 'Application',
+            x: 0,
+            y: 50,
+            initialSize: 100
+        })
+        const c = this.nodesManage.addNode({
+            text: 'Manage',
+            x: -200,
+            y: -200,
+            initialSize: 50
+        })
+        const d = this.nodesManage.addNode({
+            text: 'Marketing',
+            x: -200,
+            y: 200,
+            initialSize: 50
+        })
         this.nodesManage.connectNodeToNode(a, b)
         this.nodesManage.connectNodeToNode(c, a)
         this.nodesManage.connectNodeToNode(c, b)
@@ -66,12 +87,13 @@ class Scene {
         this.camera.position.z -= e.deltaY
     }
     render () {
+        this.frame++
         // Flow rendering to Node Management
         this.nodesManage.render()
         // Ease positions with animations relating to mouse movement
         this.easeParameters()
         // Store camera data in every frame
-        this.storeCameraDataToLocalStorage()
+        if (this.frame % 300 === 0) this.storeCameraDataToLocalStorage()
     }
     easeParameters () {
         const W = window.innerWidth

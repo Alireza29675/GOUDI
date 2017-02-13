@@ -209,6 +209,7 @@
 
 	        _classCallCheck(this, Scene);
 
+	        this.frame = 0;
 	        this.renderer = renderer;
 	        // Adding Scene
 	        this.object = new THREE.Scene();
@@ -225,10 +226,30 @@
 	        this.object.add(_Lights2.default.bottomLight);
 	        // Adding nodes to Scene
 	        this.nodesManage = new _NodesManage2.default(this);
-	        var a = this.nodesManage.addNode(200, -50, -1000);
-	        var b = this.nodesManage.addNode(0, 50, -1000, 100);
-	        var c = this.nodesManage.addNode(-200, -200, -1000);
-	        var d = this.nodesManage.addNode(-200, 200, -1000);
+	        var a = this.nodesManage.addNode({
+	            text: 'Programming',
+	            x: 200,
+	            y: -50,
+	            initialSize: 50
+	        });
+	        var b = this.nodesManage.addNode({
+	            text: 'Application',
+	            x: 0,
+	            y: 50,
+	            initialSize: 100
+	        });
+	        var c = this.nodesManage.addNode({
+	            text: 'Manage',
+	            x: -200,
+	            y: -200,
+	            initialSize: 50
+	        });
+	        var d = this.nodesManage.addNode({
+	            text: 'Marketing',
+	            x: -200,
+	            y: 200,
+	            initialSize: 50
+	        });
 	        this.nodesManage.connectNodeToNode(a, b);
 	        this.nodesManage.connectNodeToNode(c, a);
 	        this.nodesManage.connectNodeToNode(c, b);
@@ -276,12 +297,13 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            this.frame++;
 	            // Flow rendering to Node Management
 	            this.nodesManage.render();
 	            // Ease positions with animations relating to mouse movement
 	            this.easeParameters();
 	            // Store camera data in every frame
-	            this.storeCameraDataToLocalStorage();
+	            if (this.frame % 300 === 0) this.storeCameraDataToLocalStorage();
 	        }
 	    }, {
 	        key: 'easeParameters',
@@ -880,15 +902,14 @@
 
 	    _createClass(NodesManage, [{
 	        key: 'addNode',
-	        value: function addNode() {
-	            var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-	            var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-	            var z = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-	            var size = arguments[3];
-
-	            var node = new _Node2.default(this, x, y, z, size);
+	        value: function addNode(props) {
+	            var id = 0;
+	            while (this.nodes[id] !== undefined) {
+	                id++;
+	            }Object.assign(props, { id: id });
+	            var node = new _Node2.default(this, props);
 	            this.scene.object.add(node.getObject3D());
-	            this.nodes.push(node);
+	            this.nodes[id] = node;
 	            return node;
 	        }
 	    }, {
@@ -957,27 +978,18 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Node = function () {
-	    function Node(nodeManage) {
-	        var x = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-	        var y = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
+	    function Node(nodeManage, initialProps) {
 	        var _this = this;
-
-	        var z = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-	        var size = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 50;
 
 	        _classCallCheck(this, Node);
 
 	        this.scene = nodeManage.scene;
 	        // set props of node
 	        this.props = {
-	            id: {
-	                value: 1
-	            },
+	            id: {},
 	            text: {
 	                label: 'Text',
-	                type: 'text',
-	                value: 'Eventum'
+	                type: 'text'
 	            },
 	            initialSize: {
 	                label: 'Initial Size',
@@ -985,21 +997,19 @@
 	                options: {
 	                    min: 50,
 	                    max: 100
-	                },
-	                value: 50
+	                }
 	            },
 	            x: {
 	                label: 'Position x',
-	                type: 'number',
-	                value: x
+	                type: 'number'
 	            },
 	            y: {
 	                label: 'Position y',
-	                type: 'number',
-	                options: { step: 0.1 },
-	                value: y
+	                type: 'number'
 	            }
 	        };
+	        // set initial props
+	        this.setInitialProps(initialProps);
 	        // Node Geometry
 	        this.geometry = new THREE.SphereGeometry(50, 50, 50);
 	        // Node Material
@@ -1012,10 +1022,10 @@
 	        // Combining geometry and material
 	        this.mesh = new THREE.Mesh(this.geometry, this.material);
 	        // set text
-	        this.addText(this.props.text.value);
+	        this.addText(this.getProp('text'));
 	        // set Node's size and scale
-	        this.size = size;
-	        this.setSize(size);
+	        this.size = this.getProp('initialSize');
+	        this.setSize(this.size);
 	        // Set position of mesh
 	        this.setPos({
 	            x: this.props.x.value,
@@ -1044,6 +1054,23 @@
 	    }
 
 	    _createClass(Node, [{
+	        key: 'setInitialProps',
+	        value: function setInitialProps(props) {
+	            for (var prop in props) {
+	                this.setProp(prop, props[prop]);
+	            }
+	        }
+	    }, {
+	        key: 'setProp',
+	        value: function setProp(prop, value) {
+	            this.props[prop].value = value;
+	        }
+	    }, {
+	        key: 'getProp',
+	        value: function getProp(prop) {
+	            return this.props[prop].value;
+	        }
+	    }, {
 	        key: 'setPos',
 	        value: function setPos() {
 	            var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -1132,7 +1159,8 @@
 	    }, {
 	        key: 'setPropertyY',
 	        value: function setPropertyY(value) {
-	            console.log(value);
+	            this.props.y.value = value;
+	            this.setPos({ y: parseFloat(value) });
 	        }
 	    }]);
 
@@ -2490,7 +2518,7 @@
 
 	            this.changebarContent = create('input');
 	            this.changebarContent.type = 'text';
-	            this.changebarContent.value = this.options.value || '';
+	            this.changebarContent.value = this.options.value;
 	            if (!readonly) {
 	                this.changebarContent.onkeyup = function () {
 	                    _this.onchange(_this.options.name, _this.changebarContent.value);
@@ -2509,7 +2537,7 @@
 	            this.changebarContent.min = this.options.min || '';
 	            this.changebarContent.max = this.options.max || '';
 	            this.changebarContent.step = this.options.step || '';
-	            this.changebarContent.value = this.options.value || '';
+	            this.changebarContent.value = this.options.value;
 	            this.changebarContent.onchange = this.changebarContent.onmouseup = function () {
 	                _this2.onchange(_this2.options.name, _this2.changebarContent.value);
 	            };
@@ -2524,7 +2552,7 @@
 	            this.changebarContent.min = this.options.min || '';
 	            this.changebarContent.max = this.options.max || '';
 	            this.changebarContent.step = this.options.step || '';
-	            this.changebarContent.value = this.options.value || this.options.min || '';
+	            this.changebarContent.value = this.options.value;
 	            this.valueContent = create('input');
 	            this.valueContent.disabled = true;
 	            this._value = this.valueContent.value = this.changebarContent.value;
@@ -2581,7 +2609,7 @@
 	                }
 	            }
 
-	            this.changebarContent.value = this.options.value || '';
+	            this.changebarContent.value = this.options.value;
 	            this.changebarContent.onchange = function () {
 	                _this5.onchange(_this5.options.name, _this5.changebarContent.value);
 	            };

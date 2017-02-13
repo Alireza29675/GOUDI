@@ -1,17 +1,14 @@
 import GLText from './GLText'
 
 class Node {
-    constructor (nodeManage, x = 0, y = 0, z = 0, size = 50) {
+    constructor (nodeManage, initialProps) {
         this.scene = nodeManage.scene
         // set props of node
         this.props = {
-            id: {
-                value: 1
-            },
+            id: {},
             text: {
                 label: 'Text',
-                type: 'text',
-                value: 'Eventum'
+                type: 'text'
             },
             initialSize: {
                 label: 'Initial Size',
@@ -19,21 +16,19 @@ class Node {
                 options: {
                     min: 50,
                     max: 100
-                },
-                value: 50
+                }
             },
             x: {
                 label: 'Position x',
-                type: 'number',
-                value: x
+                type: 'number'
             },
             y: {
                 label: 'Position y',
-                type: 'number',
-                options: { step: 0.1 },
-                value: y
+                type: 'number'
             }
         }
+        // set initial props
+        this.setInitialProps(initialProps)
         // Node Geometry
         this.geometry = new THREE.SphereGeometry(50, 50, 50)
         // Node Material
@@ -46,10 +41,10 @@ class Node {
         // Combining geometry and material
         this.mesh = new THREE.Mesh(this.geometry, this.material)
         // set text
-        this.addText(this.props.text.value)
+        this.addText(this.getProp('text'))
         // set Node's size and scale
-        this.size = size
-        this.setSize(size)
+        this.size = this.getProp('initialSize')
+        this.setSize(this.size)
         // Set position of mesh
         this.setPos({
             x: this.props.x.value,
@@ -63,6 +58,15 @@ class Node {
         window.bindEvent.addEventListener(this.mesh, 'mouseup', e => { this.onMouseUp(e) }, false)
         window.bindEvent.addEventListener(this.mesh, 'mouseover', e => { this.onMouseOver(e) }, false)
         window.bindEvent.addEventListener(this.mesh, 'mouseout', e => { this.onMouseOut(e) }, false)
+    }
+    setInitialProps (props) {
+        for (let prop in props) this.setProp(prop, props[prop])
+    }
+    setProp (prop, value) {
+        this.props[prop].value = value
+    }
+    getProp (prop) {
+        return this.props[prop].value
     }
     setPos (obj = {}, forceRate) {
         // Merging obj and current position together
@@ -126,7 +130,8 @@ class Node {
         this.setPos({x: parseFloat(value)})
     }
     setPropertyY (value) {
-        console.log(value)
+        this.props.y.value = value
+        this.setPos({y: parseFloat(value)})
     }
 }
 

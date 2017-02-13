@@ -9,10 +9,13 @@ class NodesManage {
         // Adding Properties Panel
         this.panel = new PropertiesPanel(this)
     }
-    addNode (x = 0, y = 0, z = 0, size) {
-        const node = new Node (this, x, y, z, size)
+    addNode (props) {
+        let id = 0
+        while (this.nodes[id] !== undefined) id++
+        Object.assign(props, {id: id})
+        const node = new Node(this, props)
         this.scene.object.add(node.getObject3D())
-        this.nodes.push(node)
+        this.nodes[id] = node
         return node
     }
     onFocusOnNode (node) {

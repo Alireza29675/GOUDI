@@ -63,7 +63,7 @@ class Property {
     setTextContents (readonly = false) {
         this.changebarContent = create('input')
         this.changebarContent.type = 'text'
-        this.changebarContent.value = this.options.value || ''
+        this.changebarContent.value = this.options.value
         if (!readonly) {
             this.changebarContent.onkeyup = () => { this.onchange(this.options.name, this.changebarContent.value) }
         } else {
@@ -76,7 +76,7 @@ class Property {
         this.changebarContent.min = this.options.min || ''
         this.changebarContent.max = this.options.max || ''
         this.changebarContent.step = this.options.step || ''
-        this.changebarContent.value = this.options.value || ''
+        this.changebarContent.value = this.options.value
         this.changebarContent.onchange = this.changebarContent.onmouseup = () => {
             this.onchange(this.options.name, this.changebarContent.value)
         }
@@ -87,7 +87,7 @@ class Property {
         this.changebarContent.min = this.options.min || ''
         this.changebarContent.max = this.options.max || ''
         this.changebarContent.step = this.options.step || ''
-        this.changebarContent.value = this.options.value || this.options.min || ''
+        this.changebarContent.value = this.options.value
         this.valueContent = create('input')
         this.valueContent.disabled = true
         this._value = this.valueContent.value = this.changebarContent.value
@@ -114,7 +114,7 @@ class Property {
             el.innerHTML = option.label
             this.changebarContent.appendChild(el)
         }
-        this.changebarContent.value = this.options.value || ''
+        this.changebarContent.value = this.options.value
         this.changebarContent.onchange = () => {
             this.onchange(this.options.name, this.changebarContent.value)
         }
