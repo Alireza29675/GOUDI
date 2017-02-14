@@ -28,6 +28,9 @@ class Node {
                 type: 'number'
             }
         }
+        // Define srcs and rfrs objects
+        this.rfrs = [] // refer arrows
+        this.srcs = [] // source arrows
         // set initial props
         this.setInitialProps(initialProps)
         // Node Geometry
@@ -112,7 +115,8 @@ class Node {
         arrow = this.nodeManage.connect(this, object)
         return arrow
     }
-
+    refreshRefers () { this.rfrs = this.nodeManage.getArrowByFrom(this) }
+    refreshSources () { this.srcs = this.nodeManage.getArrowByTo(this) }
 
     // Properties set
     setPropertyText (value) {
@@ -124,12 +128,16 @@ class Node {
         this.setProp('x', value)
         this.position.x = value
         this.setPos({x: parseFloat(value)})
+        for (let refer of this.rfrs) refer.fix()
+        for (let source of this.srcs) source.fix()
         this.scene.lookToNode(this)
     }
     setPropertyY (value) {
         this.setProp('y', value)
         this.position.y = value
         this.setPos({y: parseFloat(value)})
+        for (let refer of this.rfrs) refer.fix()
+        for (let source of this.srcs) source.fix()
         this.scene.lookToNode(this)
     }
 }

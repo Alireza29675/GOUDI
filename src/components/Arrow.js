@@ -9,6 +9,7 @@ class Arrow {
         this.setTo(to)
         // arrow basics
         this.arrowHeight = 20
+        this.height = 0
         this.arrow = new THREE.Object3D()
         // arrow material
         this.material = new THREE.MeshStandardMaterial({ color: 0xffffff })
@@ -23,7 +24,10 @@ class Arrow {
     }
     // change from to another Node or Pos-Object
     setFrom (from) {
-        if (from instanceof Node) this.from = from
+        if (from instanceof Node) {
+            this.from = from
+            from.refreshRefers()
+        }
         else {
             from = Object.assign({x: 0, y: 0, z: 0}, from)
             this.from = { position: from, size: 0 }
@@ -31,7 +35,10 @@ class Arrow {
     }
     // change to to another Node or Pos-Object
     setTo (to) {
-        if (to instanceof Node) this.to = to
+        if (to instanceof Node) {
+            this.to = to
+            to.refreshSources()
+        }
         else {
             to = Object.assign({x: 0, y: 0, z: 0}, to)
             this.to = { position: to, size: 0 }
@@ -61,10 +68,12 @@ class Arrow {
         deltaY = to.y - from.y
         deltaZ = to.z - from.z
         rotateZ = Math.atan2(deltaY, deltaX)
+        // last height
+        const lastHeight = this.height
         // Calculating length of arrow
         this.height = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2))
         // fixing geometry of cone and cylinder
-        this.cone.geometry.translate(0, (this.height - this.arrowHeight)/2, 0)
+        this.cone.geometry.translate(0, (this.height - lastHeight)/2, 0)
         this.cylinder.geometry = this.getCylinderGeo()
         this.cylinder.geometry.translate(0, -this.arrowHeight/2, 0)
         // setting Object3D position of arrow
@@ -78,6 +87,7 @@ class Arrow {
     getCone () {
         // Making a cone mesh
         this.coneGeometry = new THREE.ConeGeometry(10, this.arrowHeight, 32)
+        this.coneGeometry.translate(0, -(this.arrowHeight)/2, 0)
         const mesh = new THREE.Mesh(this.coneGeometry, this.material)
         return mesh
     }

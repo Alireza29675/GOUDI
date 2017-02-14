@@ -918,12 +918,15 @@
 	        _classCallCheck(this, NodesManage);
 
 	        this.nodes = [];
+	        this.arrows = [];
 	        this.scene = scene;
 	        // Adding Properties Panel
 	        this.panel = new _PropertiesPanel2.default(this);
 	        // set focused node
 	        this.focusedNode = null;
 	    }
+	    // Set and Get Nodes Management
+
 
 	    _createClass(NodesManage, [{
 	        key: 'addNode',
@@ -942,6 +945,8 @@
 	        value: function get(id) {
 	            return this.nodes[id];
 	        }
+	        // Exploring and Focusing Management
+
 	    }, {
 	        key: 'onFocusOnNode',
 	        value: function onFocusOnNode(node) {
@@ -949,13 +954,62 @@
 	            this.focusedNode = node;
 	            this.storeNodeManageStatus();
 	        }
+	        // Connection Management
+
 	    }, {
 	        key: 'connect',
 	        value: function connect(from, to) {
+	            // connection can make with IDs
+	            if (typeof from === 'number') from = this.get(from);
+	            if (typeof to === 'number') to = this.get(to);
+	            // Define a new Arrow
 	            var arrow = new _Arrow2.default(from, to);
+	            // adding arrow to arrows array
+	            this.arrows.push(arrow);
+	            // Refresh refers and sources
+	            if (from.refreshRefers !== undefined) from.refreshRefers();
+	            if (to.refreshSources !== undefined) to.refreshSources();
+	            // Adding arrow to scene
 	            this.scene.object.add(arrow.getObject3D());
 	            return arrow;
 	        }
+	    }, {
+	        key: 'getArrowByFrom',
+	        value: function getArrowByFrom(from) {
+	            return this.arrows.filter(function (arrow) {
+	                return arrow.from == from;
+	            });
+	        }
+	    }, {
+	        key: 'getArrowByTo',
+	        value: function getArrowByTo(to) {
+	            return this.arrows.filter(function (arrow) {
+	                return arrow.to == to;
+	            });
+	        }
+	    }, {
+	        key: 'getArrowByFromAndTo',
+	        value: function getArrowByFromAndTo(from, to) {
+	            return this.arrows.filter(function (arrow) {
+	                return arrow.from == from && arrow.to == to;
+	            });
+	        }
+	    }, {
+	        key: 'getAllNodeToNodeArrows',
+	        value: function getAllNodeToNodeArrows() {
+	            return this.arrows.filter(function (arrow) {
+	                return arrow.to instanceof _Node2.default;
+	            });
+	        }
+	    }, {
+	        key: 'getAllNodeToPositionArrows',
+	        value: function getAllNodeToPositionArrows() {
+	            return this.arrows.filter(function (arrow) {
+	                return !(arrow.to instanceof _Node2.default);
+	            });
+	        }
+	        // Storage Management
+
 	    }, {
 	        key: 'storeNodeManageStatus',
 	        value: function storeNodeManageStatus(id) {
@@ -1035,6 +1089,9 @@
 	                type: 'number'
 	            }
 	        };
+	        // Define srcs and rfrs objects
+	        this.rfrs = []; // refer arrows
+	        this.srcs = []; // source arrows
 	        // set initial props
 	        this.setInitialProps(initialProps);
 	        // Node Geometry
@@ -1175,6 +1232,16 @@
 	            arrow = this.nodeManage.connect(this, object);
 	            return arrow;
 	        }
+	    }, {
+	        key: 'refreshRefers',
+	        value: function refreshRefers() {
+	            this.rfrs = this.nodeManage.getArrowByFrom(this);
+	        }
+	    }, {
+	        key: 'refreshSources',
+	        value: function refreshSources() {
+	            this.srcs = this.nodeManage.getArrowByTo(this);
+	        }
 
 	        // Properties set
 
@@ -1191,6 +1258,54 @@
 	            this.setProp('x', value);
 	            this.position.x = value;
 	            this.setPos({ x: parseFloat(value) });
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = this.rfrs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var refer = _step.value;
+	                    refer.fix();
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+
+	            var _iteratorNormalCompletion2 = true;
+	            var _didIteratorError2 = false;
+	            var _iteratorError2 = undefined;
+
+	            try {
+	                for (var _iterator2 = this.srcs[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                    var source = _step2.value;
+	                    source.fix();
+	                }
+	            } catch (err) {
+	                _didIteratorError2 = true;
+	                _iteratorError2 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                        _iterator2.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError2) {
+	                        throw _iteratorError2;
+	                    }
+	                }
+	            }
+
 	            this.scene.lookToNode(this);
 	        }
 	    }, {
@@ -1199,6 +1314,54 @@
 	            this.setProp('y', value);
 	            this.position.y = value;
 	            this.setPos({ y: parseFloat(value) });
+	            var _iteratorNormalCompletion3 = true;
+	            var _didIteratorError3 = false;
+	            var _iteratorError3 = undefined;
+
+	            try {
+	                for (var _iterator3 = this.rfrs[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                    var refer = _step3.value;
+	                    refer.fix();
+	                }
+	            } catch (err) {
+	                _didIteratorError3 = true;
+	                _iteratorError3 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                        _iterator3.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError3) {
+	                        throw _iteratorError3;
+	                    }
+	                }
+	            }
+
+	            var _iteratorNormalCompletion4 = true;
+	            var _didIteratorError4 = false;
+	            var _iteratorError4 = undefined;
+
+	            try {
+	                for (var _iterator4 = this.srcs[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                    var source = _step4.value;
+	                    source.fix();
+	                }
+	            } catch (err) {
+	                _didIteratorError4 = true;
+	                _iteratorError4 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                        _iterator4.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError4) {
+	                        throw _iteratorError4;
+	                    }
+	                }
+	            }
+
 	            this.scene.lookToNode(this);
 	        }
 	    }]);
@@ -1336,6 +1499,7 @@
 	        this.setTo(to);
 	        // arrow basics
 	        this.arrowHeight = 20;
+	        this.height = 0;
 	        this.arrow = new THREE.Object3D();
 	        // arrow material
 	        this.material = new THREE.MeshStandardMaterial({ color: 0xffffff });
@@ -1354,7 +1518,10 @@
 	    _createClass(Arrow, [{
 	        key: 'setFrom',
 	        value: function setFrom(from) {
-	            if (from instanceof _Node2.default) this.from = from;else {
+	            if (from instanceof _Node2.default) {
+	                this.from = from;
+	                from.refreshRefers();
+	            } else {
 	                from = Object.assign({ x: 0, y: 0, z: 0 }, from);
 	                this.from = { position: from, size: 0 };
 	            }
@@ -1364,7 +1531,10 @@
 	    }, {
 	        key: 'setTo',
 	        value: function setTo(to) {
-	            if (to instanceof _Node2.default) this.to = to;else {
+	            if (to instanceof _Node2.default) {
+	                this.to = to;
+	                to.refreshSources();
+	            } else {
 	                to = Object.assign({ x: 0, y: 0, z: 0 }, to);
 	                this.to = { position: to, size: 0 };
 	            }
@@ -1396,10 +1566,12 @@
 	            deltaY = to.y - from.y;
 	            deltaZ = to.z - from.z;
 	            rotateZ = Math.atan2(deltaY, deltaX);
+	            // last height
+	            var lastHeight = this.height;
 	            // Calculating length of arrow
 	            this.height = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2));
 	            // fixing geometry of cone and cylinder
-	            this.cone.geometry.translate(0, (this.height - this.arrowHeight) / 2, 0);
+	            this.cone.geometry.translate(0, (this.height - lastHeight) / 2, 0);
 	            this.cylinder.geometry = this.getCylinderGeo();
 	            this.cylinder.geometry.translate(0, -this.arrowHeight / 2, 0);
 	            // setting Object3D position of arrow
@@ -1415,6 +1587,7 @@
 	        value: function getCone() {
 	            // Making a cone mesh
 	            this.coneGeometry = new THREE.ConeGeometry(10, this.arrowHeight, 32);
+	            this.coneGeometry.translate(0, -this.arrowHeight / 2, 0);
 	            var mesh = new THREE.Mesh(this.coneGeometry, this.material);
 	            return mesh;
 	        }
