@@ -85,6 +85,12 @@ class Arrow {
         // * It just work for 2D Rotations now *
         this.rotateZ(rotateZ)
     }
+    checkVisibility () {
+        const fromVisiblity = this.from.visible == undefined || this.from.visible == true
+        const toVisiblity = this.to.visible == undefined || this.to.visible == true
+        if (fromVisiblity && toVisiblity) this.arrow.visible = true
+        else this.arrow.visible = false
+    }
     getCone () {
         // Making a cone mesh
         this.coneGeometry = new THREE.ConeGeometry(10, this.arrowHeight, 32)

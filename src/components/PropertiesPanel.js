@@ -49,6 +49,12 @@ class PropertiesPanel {
             })
         }
     }
+    getPropertyObject (prop) {
+        for (let property of this.panelProperties) if (property.options.name === prop) return property
+    }
+    onPropSet (prop, value) {
+        this.getPropertyObject(prop).setValue(value)
+    }
     resetPanel () {
         // freeing up memory
         for (let panelProperty of this.panelProperties) {

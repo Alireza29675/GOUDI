@@ -20,16 +20,23 @@ class NodesManage {
         const node = new Node(this, props)
         this.scene.object.add(node.getObject3D())
         this.nodes[id] = node
+        this.makeDraggable()
         return node
+    }
+    makeDraggable () {
+        if (this.DragControl !== undefined) this.DragControl.deactivate()
+        const nodesObjects = this.nodes.filter((node) => node !== undefined).map((node) => node.getObject3D())
+        this.DragControl = new THREE.DragControls(nodesObjects, this.scene.camera, this.scene.renderer.domElement)
+        this.DragControl.addEventListener('drag', (e)=>{ this.getByUUID(e.object.uuid).onDragging() })
+        this.DragControl.addEventListener('dragend', (e)=>{ this.getByUUID(e.object.uuid).onDragEnd() })
     }
     removeNode (node) {
         this.scene.object.remove(node.getObject3D())
         this.nodes[node.getProp('id')] = null
         delete this.nodes[node.getProp('id')]
     }
-    get (id) {
-        return this.nodes[id]
-    }
+    get (id) { return this.nodes[id] }
+    getByUUID (uuid) { for (let node of this.nodes) if (node.uuid == uuid) return node }
     // Exploring and Focusing Management
     onFocusOnNode (node) {
         this.panel.focus(node)

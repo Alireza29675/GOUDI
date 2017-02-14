@@ -41,6 +41,9 @@ class Property {
         if (this.valueContent !== null) this.value.appendChild(this.valueContent)
         this.container.appendChild(this.value)
     }
+    setValue (value) {
+        if (this.changebarContent !== undefined) this.changebarContent.value = value
+    }
     setCellContents () {
         this.changebarContent = null
         this.valueContent = null

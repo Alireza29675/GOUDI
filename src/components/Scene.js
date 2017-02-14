@@ -1,6 +1,5 @@
 import lights from './Lights'
 import NodesManage from './NodesManage'
-import keyboard from 'mousetrap'
 
 const ease = (from, to, rate = 6) => {
     return from + (to - from) / rate
@@ -9,6 +8,7 @@ const ease = (from, to, rate = 6) => {
 class Scene {
     constructor (options, renderer) {
         this.frame = 0
+        this.isDragging = false
         this.renderer = renderer
         // Adding Scene
         this.object = new THREE.Scene()
@@ -59,11 +59,6 @@ class Scene {
         this.nodesManage.loadNodeManageStatus()
         // add zoom out and in on mouse wheel
         window.addEventListener('mousewheel', e => { this.onMouseWheel(e) })
-        // reset camera // DEBUGGING
-        keyboard.bind('r e s e t c a m', e => {
-            this.camera.position.set(0, 0, 0)
-            this.camera.rotation.set(0, 0, 0)
-        })
         // Mouse hover and click detect
         window.addEventListener('mousemove', e => {
             window.MOUSE.x = e.clientX
@@ -94,7 +89,7 @@ class Scene {
         // Ease positions with animations relating to mouse movement
         this.easeParameters()
         // Store camera data in every frame
-        if (this.frame % 300 === 0) this.storeCameraDataToLocalStorage()
+        if (this.frame % 300 === 0 && !this.isDragging) this.storeCameraDataToLocalStorage()
     }
     easeParameters () {
         const W = window.innerWidth
