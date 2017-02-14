@@ -8,6 +8,8 @@ class NodesManage {
         this.scene = scene
         // Adding Properties Panel
         this.panel = new PropertiesPanel(this)
+        // set focused node
+        this.focusedNode = null
     }
     addNode (props) {
         let id = 0
@@ -18,34 +20,31 @@ class NodesManage {
         this.nodes[id] = node
         return node
     }
+    get (id) {
+        return this.nodes[id]
+    }
     onFocusOnNode (node) {
         this.panel.focus(node)
+        this.focusedNode = node
+        this.storeNodeManageStatus()
     }
-    connectNodeToNode(nodeFrom, nodeTo) {
-        const deltaX = nodeTo.position.x - nodeFrom.position.x
-        const deltaY = nodeTo.position.y - nodeFrom.position.y
-        const rotateZ = Math.atan2(deltaY, deltaX)
-        const to = {
-            x: nodeTo.position.x + (Math.cos(rotateZ - Math.PI) * nodeTo.size),
-            y: nodeTo.position.y + (Math.sin(rotateZ - Math.PI) * nodeTo.size),
-            z: nodeTo.position.z
-        }
-        const arrow = this.connectNodeToPosition(nodeFrom, to)
-        return arrow
-    }
-    connectNodeToPosition(nodeFrom, position) {
-        const deltaX = position.x - nodeFrom.position.x
-        const deltaY = position.y - nodeFrom.position.y
-        const deltaZ = position.z - nodeFrom.position.z
-        const rotateZ = Math.atan2(deltaY, deltaX)
-        const from = {
-            x: nodeFrom.position.x + (Math.cos(rotateZ) * nodeFrom.size),
-            y: nodeFrom.position.y + (Math.sin(rotateZ) * nodeFrom.size),
-            z: nodeFrom.position.z
-        }
-        const arrow = new Arrow (from, position)
+    connect(from, to) {
+        const arrow = new Arrow (from, to)
         this.scene.object.add(arrow.getObject3D())
         return arrow
+    }
+    storeNodeManageStatus (id) {
+        localStorage.setItem('nodemanage', JSON.stringify({
+            focusedNodeId: this.focusedNode.getProp('id')
+        }))
+    }
+    loadNodeManageStatus () {
+        if (localStorage.getItem('nodemanage') !== null) {
+            const storedData = JSON.parse(localStorage.getItem('nodemanage'))
+            const focusedNodeId = storedData.focusedNodeId
+            this.focusedNode = this.get(parseInt(focusedNodeId))
+            this.scene.focusCameraOn(this.focusedNode)
+        }
     }
     render () {
 

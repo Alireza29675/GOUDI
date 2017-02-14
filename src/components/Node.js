@@ -2,6 +2,7 @@ import GLText from './GLText'
 
 class Node {
     constructor (nodeManage, initialProps) {
+        this.nodeManage = nodeManage
         this.scene = nodeManage.scene
         // set props of node
         this.props = {
@@ -98,40 +99,38 @@ class Node {
         this.text.nodeSize = size
     }
     // Binding Events
-    onClick (e) {
-        if (this.scene.focusNode !== this) {
-            this.scene.focusCameraOn(this)
-        }
+    onClick (e) { if (this.scene.focusNode !== this) this.scene.focusCameraOn(this) }
+    onDoubleClick (e) {}
+    onMouseOver (e) { document.body.style.cursor = 'pointer' }
+    onMouseOut (e) { document.body.style.cursor = 'default' }
+    onMouseDown (e) {}
+    onMouseUp (e) {}
+
+    // Sources and Refers Handling
+    connectTo (object) {
+        let arrow = null
+        arrow = this.nodeManage.connect(this, object)
+        return arrow
     }
-    onDoubleClick (e) {
-        
-    }
-    onMouseOver (e) {
-        document.body.style.cursor = 'pointer'
-    }
-    onMouseOut (e) {
-        document.body.style.cursor = 'default'
-    }
-    onMouseDown (e) {
-        
-    }
-    onMouseUp (e) {
-        
-    }
+
 
     // Properties set
     setPropertyText (value) {
-        this.props.text.value = value
+        this.setProp('text', value)
         document.querySelector('.panel > .header > span').innerHTML = value
         this.setText(value)
     }
     setPropertyX (value) {
-        this.props.x.value = value
+        this.setProp('x', value)
+        this.position.x = value
         this.setPos({x: parseFloat(value)})
+        this.scene.lookToNode(this)
     }
     setPropertyY (value) {
-        this.props.y.value = value
+        this.setProp('y', value)
+        this.position.y = value
         this.setPos({y: parseFloat(value)})
+        this.scene.lookToNode(this)
     }
 }
 

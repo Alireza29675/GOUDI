@@ -49,13 +49,14 @@ class Scene {
             y: 200,
             initialSize: 50
         })
-        this.nodesManage.connectNodeToNode(a, b)
-        this.nodesManage.connectNodeToNode(c, a)
-        this.nodesManage.connectNodeToNode(c, b)
-        this.nodesManage.connectNodeToNode(d, b)
-        this.nodesManage.connectNodeToPosition(d, {x: -100, y: 250, z: 0 })
+        a.connectTo(b)
+        c.connectTo(a)
+        c.connectTo(b)
+        d.connectTo(b)
+        d.connectTo({x: -100, y: 250, z: 0 })
         // Set Focus Node
         this.focusNode = null
+        this.nodesManage.loadNodeManageStatus()
         // add zoom out and in on mouse wheel
         window.addEventListener('mousewheel', e => { this.onMouseWheel(e) })
         // reset camera // DEBUGGING
@@ -126,6 +127,9 @@ class Scene {
     focusCameraOn (node) {
         this.focusNode = node
         this.nodesManage.onFocusOnNode(node)
+        this.lookToNode(node)
+    }
+    lookToNode (node) {
         this.wishCameraPosition = {
             x: node.getObject3D().position.x,
             y: node.getObject3D().position.y
@@ -141,7 +145,7 @@ class Scene {
     }
     loadStoredCameraDataFromLocalStorage () {
         // if there was a camera item in localStorage set initial position and rotation of camera
-        if (localStorage.getItem('camera') !== undefined) {
+        if (localStorage.getItem('camera') !== null) {
             const storedData = JSON.parse(localStorage.getItem('camera'))
             if (storedData.position)
                 this.camera.position.set(storedData.position.x, storedData.position.y, storedData.position.z)

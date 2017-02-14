@@ -11,6 +11,13 @@
     user-select: none;
     font-family: Arial;
     -webkit-font-smoothing: antialiased;
+    opacity: 0;
+    transform: scale(0.95);
+    transition-duration: 0.5s;
+}
+.panel.show {
+    transform: scale(1);
+    opacity: 1;
 }
 .panel > .header {
     width: 250px;
@@ -33,9 +40,9 @@
 .panel > .header > i.node-icon {
     background-image: url(./images/node_icon.png)
 }
-.panel > .header > i.arrow-icon {
+/*.panel > .header > i.arrow-icon {
     background-image: url(./images/arrow_icon.png)
-}
+}*/
 .panel > .header > span {
     font-size: 13px;
     display: inline-block;
