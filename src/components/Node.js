@@ -101,6 +101,11 @@ class Node {
         this.getObject3D().scale.x = this.getObject3D().scale.y = size / 50
         this.text.nodeSize = size
     }
+    remove () {
+        for (let refer of this.rfrs) refer.remove()
+        for (let source of this.srcs) source.remove()
+        this.nodeManage.removeNode(this)
+    }
     // Binding Events
     onClick (e) { if (this.scene.focusNode !== this) this.scene.focusCameraOn(this) }
     onDoubleClick (e) {}

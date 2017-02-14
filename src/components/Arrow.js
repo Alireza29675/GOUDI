@@ -3,7 +3,8 @@ import Node from './Node'
 
 // Arrow Class
 class Arrow {
-    constructor (from = {x: 0, y: 0, z: 0}, to = {x: 0, y: 0, z: 0}) {
+    constructor (nodeManage, from = {x: 0, y: 0, z: 0}, to = {x: 0, y: 0, z: 0}) {
+        this.nodeManage = nodeManage
         // Initializing from and to for Nodes and Pos-Objects
         this.setFrom(from)
         this.setTo(to)
@@ -104,6 +105,8 @@ class Arrow {
     }
     // get Object3D of arrow
     getObject3D () { return this.arrow }
+    // remove Object3D
+    remove () { this.nodeManage.removeArrow(this) }
     // set Object3D position and rotation
     setX (x) { this.getObject3D().position.x = x }
     setY (y) { this.getObject3D().position.y = y }

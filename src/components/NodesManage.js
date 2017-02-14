@@ -22,6 +22,11 @@ class NodesManage {
         this.nodes[id] = node
         return node
     }
+    removeNode (node) {
+        this.scene.object.remove(node.getObject3D())
+        this.nodes[node.getProp('id')] = null
+        delete this.nodes[node.getProp('id')]
+    }
     get (id) {
         return this.nodes[id]
     }
@@ -37,7 +42,7 @@ class NodesManage {
         if (typeof from === 'number') from = this.get(from)
         if (typeof to === 'number') to = this.get(to)
         // Define a new Arrow
-        const arrow = new Arrow (from, to)
+        const arrow = new Arrow (this, from, to)
         // adding arrow to arrows array
         this.arrows.push(arrow)
         // Refresh refers and sources
@@ -47,20 +52,17 @@ class NodesManage {
         this.scene.object.add(arrow.getObject3D())
         return arrow
     }
-    getArrowByFrom (from) {
-        return this.arrows.filter((arrow)=>{ return arrow.from == from })
-    }
-    getArrowByTo (to) {
-        return this.arrows.filter((arrow)=>{ return arrow.to == to })
-    }
-    getArrowByFromAndTo (from, to) {
-        return this.arrows.filter((arrow)=>{ return arrow.from == from && arrow.to == to })
-    }
-    getAllNodeToNodeArrows () {
-        return this.arrows.filter((arrow)=>{ return arrow.to instanceof Node })
-    }
-    getAllNodeToPositionArrows () {
-        return this.arrows.filter((arrow)=>{ return !(arrow.to instanceof Node) })
+    getArrowByFrom (from) { return this.arrows.filter(arrow => arrow.from == from) }
+    getArrowByTo (to) { return this.arrows.filter(arrow => arrow.to == to) }
+    getArrowByFromAndTo (from, to) { return this.arrows.filter(arrow => arrow.from == from && arrow.to == to) }
+    getAllNodeToNodeArrows () { return this.arrows.filter(arrow => arrow.to instanceof Node) }
+    getAllNodeToPositionArrows () { return this.arrows.filter(arrow => !(arrow.to instanceof Node)) }
+    getIndexOfArrow (checkArrow) { for (let i = 0; i < this.arrows.length; i++) if (this.arrows[i] == checkArrow) return i }
+    removeArrow (arrow) {
+        this.scene.object.remove(arrow.getObject3D())
+        const index = this.getIndexOfArrow(arrow)
+        this.arrows[index] = null
+        delete this.arrows[index]
     }
     // Storage Management
     storeNodeManageStatus (id) {

@@ -5,8 +5,7 @@ class GLText {
         this.material = new THREE.MeshStandardMaterial({
             color: 0xffffff,
             roughness: 0.8,
-            metalness: 0.5,
-            opacity: 0
+            metalness: 0.5
         })
         this.geometry = this.getGeometry(text)
         this.mesh = new THREE.Mesh(this.geometry, this.material)
@@ -22,9 +21,9 @@ class GLText {
     getGeometry (text) {
         if (text === '' || text === undefined) {
             text = '.'
-            this.material.transparent = true
+            this.material.visible = false
         } else {
-            this.material.transparent = false
+            this.material.visible = true
         }
         const geometry = new THREE.TextGeometry(text, {
             font: window.GL_FONTS.droid,

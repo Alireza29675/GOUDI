@@ -941,6 +941,13 @@
 	            return node;
 	        }
 	    }, {
+	        key: 'removeNode',
+	        value: function removeNode(node) {
+	            this.scene.object.remove(node.getObject3D());
+	            this.nodes[node.getProp('id')] = null;
+	            delete this.nodes[node.getProp('id')];
+	        }
+	    }, {
 	        key: 'get',
 	        value: function get(id) {
 	            return this.nodes[id];
@@ -963,7 +970,7 @@
 	            if (typeof from === 'number') from = this.get(from);
 	            if (typeof to === 'number') to = this.get(to);
 	            // Define a new Arrow
-	            var arrow = new _Arrow2.default(from, to);
+	            var arrow = new _Arrow2.default(this, from, to);
 	            // adding arrow to arrows array
 	            this.arrows.push(arrow);
 	            // Refresh refers and sources
@@ -1007,6 +1014,21 @@
 	            return this.arrows.filter(function (arrow) {
 	                return !(arrow.to instanceof _Node2.default);
 	            });
+	        }
+	    }, {
+	        key: 'getIndexOfArrow',
+	        value: function getIndexOfArrow(checkArrow) {
+	            for (var i = 0; i < this.arrows.length; i++) {
+	                if (this.arrows[i] == checkArrow) return i;
+	            }
+	        }
+	    }, {
+	        key: 'removeArrow',
+	        value: function removeArrow(arrow) {
+	            this.scene.object.remove(arrow.getObject3D());
+	            var index = this.getIndexOfArrow(arrow);
+	            this.arrows[index] = null;
+	            delete this.arrows[index];
 	        }
 	        // Storage Management
 
@@ -1196,6 +1218,59 @@
 	            this.getObject3D().scale.x = this.getObject3D().scale.y = size / 50;
 	            this.text.nodeSize = size;
 	        }
+	    }, {
+	        key: 'remove',
+	        value: function remove() {
+	            var _iteratorNormalCompletion = true;
+	            var _didIteratorError = false;
+	            var _iteratorError = undefined;
+
+	            try {
+	                for (var _iterator = this.rfrs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                    var refer = _step.value;
+	                    refer.remove();
+	                }
+	            } catch (err) {
+	                _didIteratorError = true;
+	                _iteratorError = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion && _iterator.return) {
+	                        _iterator.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError) {
+	                        throw _iteratorError;
+	                    }
+	                }
+	            }
+
+	            var _iteratorNormalCompletion2 = true;
+	            var _didIteratorError2 = false;
+	            var _iteratorError2 = undefined;
+
+	            try {
+	                for (var _iterator2 = this.srcs[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                    var source = _step2.value;
+	                    source.remove();
+	                }
+	            } catch (err) {
+	                _didIteratorError2 = true;
+	                _iteratorError2 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                        _iterator2.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError2) {
+	                        throw _iteratorError2;
+	                    }
+	                }
+	            }
+
+	            this.nodeManage.removeNode(this);
+	        }
 	        // Binding Events
 
 	    }, {
@@ -1258,62 +1333,6 @@
 	            this.setProp('x', value);
 	            this.position.x = value;
 	            this.setPos({ x: parseFloat(value) });
-	            var _iteratorNormalCompletion = true;
-	            var _didIteratorError = false;
-	            var _iteratorError = undefined;
-
-	            try {
-	                for (var _iterator = this.rfrs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                    var refer = _step.value;
-	                    refer.fix();
-	                }
-	            } catch (err) {
-	                _didIteratorError = true;
-	                _iteratorError = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion && _iterator.return) {
-	                        _iterator.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError) {
-	                        throw _iteratorError;
-	                    }
-	                }
-	            }
-
-	            var _iteratorNormalCompletion2 = true;
-	            var _didIteratorError2 = false;
-	            var _iteratorError2 = undefined;
-
-	            try {
-	                for (var _iterator2 = this.srcs[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                    var source = _step2.value;
-	                    source.fix();
-	                }
-	            } catch (err) {
-	                _didIteratorError2 = true;
-	                _iteratorError2 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                        _iterator2.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError2) {
-	                        throw _iteratorError2;
-	                    }
-	                }
-	            }
-
-	            this.scene.lookToNode(this);
-	        }
-	    }, {
-	        key: 'setPropertyY',
-	        value: function setPropertyY(value) {
-	            this.setProp('y', value);
-	            this.position.y = value;
-	            this.setPos({ y: parseFloat(value) });
 	            var _iteratorNormalCompletion3 = true;
 	            var _didIteratorError3 = false;
 	            var _iteratorError3 = undefined;
@@ -1364,6 +1383,62 @@
 
 	            this.scene.lookToNode(this);
 	        }
+	    }, {
+	        key: 'setPropertyY',
+	        value: function setPropertyY(value) {
+	            this.setProp('y', value);
+	            this.position.y = value;
+	            this.setPos({ y: parseFloat(value) });
+	            var _iteratorNormalCompletion5 = true;
+	            var _didIteratorError5 = false;
+	            var _iteratorError5 = undefined;
+
+	            try {
+	                for (var _iterator5 = this.rfrs[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                    var refer = _step5.value;
+	                    refer.fix();
+	                }
+	            } catch (err) {
+	                _didIteratorError5 = true;
+	                _iteratorError5 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                        _iterator5.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError5) {
+	                        throw _iteratorError5;
+	                    }
+	                }
+	            }
+
+	            var _iteratorNormalCompletion6 = true;
+	            var _didIteratorError6 = false;
+	            var _iteratorError6 = undefined;
+
+	            try {
+	                for (var _iterator6 = this.srcs[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	                    var source = _step6.value;
+	                    source.fix();
+	                }
+	            } catch (err) {
+	                _didIteratorError6 = true;
+	                _iteratorError6 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
+	                        _iterator6.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError6) {
+	                        throw _iteratorError6;
+	                    }
+	                }
+	            }
+
+	            this.scene.lookToNode(this);
+	        }
 	    }]);
 
 	    return Node;
@@ -1394,8 +1469,7 @@
 	        this.material = new THREE.MeshStandardMaterial({
 	            color: 0xffffff,
 	            roughness: 0.8,
-	            metalness: 0.5,
-	            opacity: 0
+	            metalness: 0.5
 	        });
 	        this.geometry = this.getGeometry(text);
 	        this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -1416,9 +1490,9 @@
 	        value: function getGeometry(text) {
 	            if (text === '' || text === undefined) {
 	                text = '.';
-	                this.material.transparent = true;
+	                this.material.visible = false;
 	            } else {
-	                this.material.transparent = false;
+	                this.material.visible = true;
 	            }
 	            var geometry = new THREE.TextGeometry(text, {
 	                font: window.GL_FONTS.droid,
@@ -1488,12 +1562,13 @@
 
 	// Arrow Class
 	var Arrow = function () {
-	    function Arrow() {
-	        var from = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { x: 0, y: 0, z: 0 };
-	        var to = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { x: 0, y: 0, z: 0 };
+	    function Arrow(nodeManage) {
+	        var from = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { x: 0, y: 0, z: 0 };
+	        var to = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { x: 0, y: 0, z: 0 };
 
 	        _classCallCheck(this, Arrow);
 
+	        this.nodeManage = nodeManage;
 	        // Initializing from and to for Nodes and Pos-Objects
 	        this.setFrom(from);
 	        this.setTo(to);
@@ -1612,6 +1687,13 @@
 	        key: 'getObject3D',
 	        value: function getObject3D() {
 	            return this.arrow;
+	        }
+	        // remove Object3D
+
+	    }, {
+	        key: 'remove',
+	        value: function remove() {
+	            this.nodeManage.removeArrow(this);
 	        }
 	        // set Object3D position and rotation
 
