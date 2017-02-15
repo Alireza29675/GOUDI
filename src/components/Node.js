@@ -105,6 +105,21 @@ class Node {
         this.text.setText(text)
         this.setPos()
     }
+    setOutline (op) {
+        this.outlineMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff0000,
+            transparent: true,
+            opacity: op,
+            side: THREE.BackSide
+        })
+        this.outline = new THREE.Mesh(this.geometry, this.outlineMaterial)
+        this.outline.scale.multiplyScalar(1.05);
+        this.getObject3D().add(this.outline)
+    }
+    removeOutline () {
+        this.getObject3D().remove(this.outline)
+        this.outline = null
+    }
     getObject3D () {
         return this.mesh
     }
