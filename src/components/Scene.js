@@ -7,6 +7,8 @@ const ease = (from, to, rate = 6) => {
 
 class Scene {
     constructor (options, renderer) {
+        this.globalEditable = true // if this was false all editing options disabled
+        this.editingMode = true // editing mode boolean in realtime for short whiles
         this.frame = 0
         this.isDragging = false
         this.renderer = renderer
@@ -103,6 +105,22 @@ class Scene {
         // Store camera data in every frame
         if (this.frame % 300 === 0 && !this.isDragging) this.storeCameraDataToLocalStorage()
     }
+    // Disable and Enable Editing
+    disableEditingMode (force) {
+        if (this.globalEditable && this.editingMode || force) {
+            this.nodesManage.DragControl.deactivate()
+            this.nodesManage.panel.deactivate()
+        }
+        this.editingMode = false
+    }
+    enableEditingMode (force) {
+        if (this.globalEditable && !this.editingMode || force) {
+            this.editingMode = true
+            this.nodesManage.DragControl.activate()
+            this.nodesManage.panel.activate()
+        }
+    }
+    // Format Camera
     easeParameters () {
         const W = window.innerWidth
         const H = window.innerHeight
@@ -150,6 +168,7 @@ class Scene {
             y: node.getObject3D().position.y
         }
     }
+    // Store and Load Camera position on LocalStorage
     storeCameraDataToLocalStorage () {
         // stringify and store camera position and rotation to localStorage
         localStorage.setItem('camera', JSON.stringify({

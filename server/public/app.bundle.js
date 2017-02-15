@@ -188,6 +188,8 @@
 
 	        _classCallCheck(this, Scene);
 
+	        this.globalEditable = true; // if this was false all editing options disabled
+	        this.editingMode = true; // editing mode boolean in realtime for short whiles
 	        this.frame = 0;
 	        this.isDragging = false;
 	        this.renderer = renderer;
@@ -293,6 +295,28 @@
 	            // Store camera data in every frame
 	            if (this.frame % 300 === 0 && !this.isDragging) this.storeCameraDataToLocalStorage();
 	        }
+	        // Disable and Enable Editing
+
+	    }, {
+	        key: 'disableEditingMode',
+	        value: function disableEditingMode(force) {
+	            if (this.globalEditable && this.editingMode || force) {
+	                this.nodesManage.DragControl.deactivate();
+	                this.nodesManage.panel.deactivate();
+	            }
+	            this.editingMode = false;
+	        }
+	    }, {
+	        key: 'enableEditingMode',
+	        value: function enableEditingMode(force) {
+	            if (this.globalEditable && !this.editingMode || force) {
+	                this.editingMode = true;
+	                this.nodesManage.DragControl.activate();
+	                this.nodesManage.panel.activate();
+	            }
+	        }
+	        // Format Camera
+
 	    }, {
 	        key: 'easeParameters',
 	        value: function easeParameters() {
@@ -340,6 +364,8 @@
 	                y: node.getObject3D().position.y
 	            };
 	        }
+	        // Store and Load Camera position on LocalStorage
+
 	    }, {
 	        key: 'storeCameraDataToLocalStorage',
 	        value: function storeCameraDataToLocalStorage() {
@@ -776,6 +802,7 @@
 
 	        _classCallCheck(this, PropertiesPanel);
 
+	        this.active = true;
 	        // Define scene and panel
 	        this.nodesManage = nodesManage;
 	        this.panel = {
@@ -802,12 +829,25 @@
 	        value: function focus(node) {
 	            var _this2 = this;
 
+	            if (this.active) {
+	                this.panel.container.classList.remove('show');
+	                setTimeout(function () {
+	                    _this2.resetPanel();
+	                    _this2.addNodePropsItems(node);
+	                    _this2.panel.container.classList.add('show');
+	                }, 300);
+	            }
+	        }
+	    }, {
+	        key: 'activate',
+	        value: function activate() {
+	            this.active = true;
+	        }
+	    }, {
+	        key: 'deactivate',
+	        value: function deactivate() {
+	            this.active = false;
 	            this.panel.container.classList.remove('show');
-	            setTimeout(function () {
-	                _this2.resetPanel();
-	                _this2.addNodePropsItems(node);
-	                _this2.panel.container.classList.add('show');
-	            }, 300);
 	        }
 	    }, {
 	        key: 'addNodePropsItems',
@@ -1150,7 +1190,7 @@
 
 
 	// module
-	exports.push([module.id, ".panel {\n    position: absolute;\n    top: 10px;\n    right: 10px;\n    background: #333;\n    width: 250px;\n    color: white;\n    border-radius: 10px;\n    overflow: hidden;\n    -webkit-user-select: none;\n    user-select: none;\n    font-family: Arial;\n    -webkit-font-smoothing: antialiased;\n    opacity: 0;\n    transform: scale(0.95);\n    transition-duration: 0.5s;\n}\n.panel.show {\n    transform: scale(1);\n    opacity: 1;\n}\n.panel > .header {\n    width: 250px;\n    height: 40px;\n    position: relative;\n    cursor: pointer;\n    background: linear-gradient(#555, #555, #333);\n    border-radius: 10px;\n    transition-duration: 0.2s;\n}\n.panel > .header:hover {\n    opacity: 0.9;\n}\n.panel > .header:active {\n    opacity: 0.5;\n    transform: scale(0.98);\n}\n.panel > .header > i {\n    margin: 5px;\n    width: 30px;\n    height: 30px;\n    display: inline-block;\n    background-size: contain;\n}\n.panel > .header > i.node-icon {\n    background-image: url(" + __webpack_require__(9) + ")\n}\n/*.panel > .header > i.arrow-icon {\n    background-image: url(./images/arrow_icon.png)\n}*/\n.panel > .header > span {\n    font-size: 13px;\n    display: inline-block;\n    position: absolute;\n    left: 43px;\n    top: 12px;\n}\n.panel > .table {\n    display: table;\n    margin: 0;\n    width: 100%;\n    margin: 8px 0;\n}\n.panel > .table > .row {\n    display: table-row;\n    font-size: 11px;\n}\n.panel > .table > .row:nth-child(even) {\n    background: rgba(0,0,0,0.1)\n}\n.panel > .table > .row > div {\n    display: table-cell;\n    padding: 4px 2px;\n    height: 31px;\n    vertical-align: middle;\n}\n.panel > .table > .row > div.name {\n    text-align: right;\n    padding-left: 8px;\n    padding-right: 5px;\n    border-left: 4px solid red;\n}\n.panel > .table > .row > div.changebar {\n    padding-left: 5px;\n    padding-right: 5px;\n}\n.panel > .table > .row > div.value {\n    width: 30px;\n    padding-right: 10px;\n}\n.panel > .table > .row > div > input, .panel > .table > .row > div > select {\n    width: 100%;\n    height: 100%;\n    background: #333;\n    background: linear-gradient(#222, #292929);\n    outline: none;\n    border: none;\n    border-radius: 3px;\n    padding: 0 4px;\n    color: white;\n}\n.panel > .table > .row > div > button {\n    width: 100%;\n    height: 100%;\n}", ""]);
+	exports.push([module.id, ".panel {\n    position: absolute;\n    top: 10px;\n    right: 10px;\n    background: #333;\n    width: 250px;\n    color: white;\n    border-radius: 10px;\n    overflow: hidden;\n    -webkit-user-select: none;\n    user-select: none;\n    font-family: Arial;\n    -webkit-font-smoothing: antialiased;\n    opacity: 0;\n    transform: scale(0.95);\n    transition-duration: 0.5s;\n    pointer-events: none;\n}\n.panel.show {\n    transform: scale(1);\n    opacity: 1;\n    pointer-events: auto;\n}\n.panel > .header {\n    width: 250px;\n    height: 40px;\n    position: relative;\n    cursor: pointer;\n    background: linear-gradient(#555, #555, #333);\n    border-radius: 10px;\n    transition-duration: 0.2s;\n}\n.panel > .header:hover {\n    opacity: 0.9;\n}\n.panel > .header:active {\n    opacity: 0.5;\n    transform: scale(0.98);\n}\n.panel > .header > i {\n    margin: 5px;\n    width: 30px;\n    height: 30px;\n    display: inline-block;\n    background-size: contain;\n}\n.panel > .header > i.node-icon {\n    background-image: url(" + __webpack_require__(9) + ")\n}\n/*.panel > .header > i.arrow-icon {\n    background-image: url(./images/arrow_icon.png)\n}*/\n.panel > .header > span {\n    font-size: 13px;\n    display: inline-block;\n    position: absolute;\n    left: 43px;\n    top: 12px;\n}\n.panel > .table {\n    display: table;\n    margin: 0;\n    width: 100%;\n    margin: 8px 0;\n}\n.panel > .table > .row {\n    display: table-row;\n    font-size: 11px;\n}\n.panel > .table > .row:nth-child(even) {\n    background: rgba(0,0,0,0.1)\n}\n.panel > .table > .row > div {\n    display: table-cell;\n    padding: 4px 2px;\n    height: 31px;\n    vertical-align: middle;\n}\n.panel > .table > .row > div.name {\n    text-align: right;\n    padding-left: 8px;\n    padding-right: 5px;\n    border-left: 4px solid red;\n}\n.panel > .table > .row > div.changebar {\n    padding-left: 5px;\n    padding-right: 5px;\n}\n.panel > .table > .row > div.value {\n    width: 30px;\n    padding-right: 10px;\n}\n.panel > .table > .row > div > input, .panel > .table > .row > div > select {\n    width: 100%;\n    height: 100%;\n    background: #333;\n    background: linear-gradient(#222, #292929);\n    outline: none;\n    border: none;\n    border-radius: 3px;\n    padding: 0 4px;\n    color: white;\n}\n.panel > .table > .row > div > button {\n    width: 100%;\n    height: 100%;\n}", ""]);
 
 	// exports
 

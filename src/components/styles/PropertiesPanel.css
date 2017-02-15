@@ -14,10 +14,12 @@
     opacity: 0;
     transform: scale(0.95);
     transition-duration: 0.5s;
+    pointer-events: none;
 }
 .panel.show {
     transform: scale(1);
     opacity: 1;
+    pointer-events: auto;
 }
 .panel > .header {
     width: 250px;

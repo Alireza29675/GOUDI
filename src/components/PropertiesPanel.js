@@ -10,6 +10,7 @@ const get = (query) => {
 
 class PropertiesPanel {
     constructor (nodesManage) {
+        this.active = true
         // Define scene and panel
         this.nodesManage = nodesManage
         this.panel = {
@@ -32,12 +33,21 @@ class PropertiesPanel {
         this.resetPanel()
     }
     focus (node) {
+        if (this.active) {
+            this.panel.container.classList.remove('show')
+            setTimeout(()=>{
+                this.resetPanel()
+                this.addNodePropsItems(node)
+                this.panel.container.classList.add('show')
+            }, 300)
+        }
+    }
+    activate () {
+        this.active = true
+    }
+    deactivate () {
+        this.active = false
         this.panel.container.classList.remove('show')
-        setTimeout(()=>{
-            this.resetPanel()
-            this.addNodePropsItems(node)
-            this.panel.container.classList.add('show')
-        }, 300)
     }
     addNodePropsItems (node) {
         const props = node.props
