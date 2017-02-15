@@ -4,7 +4,8 @@ import Scene from './components/Scene'
 window.MOUSE = {
     x: 0, y: 0, down: false,
     downPos: {x: 0, y: 0},
-    upPos: {x: 0, y: 0}
+    upPos: {x: 0, y: 0},
+    scene: {x: 0, y: 0, z: 0}
 }
 
 // Goudi

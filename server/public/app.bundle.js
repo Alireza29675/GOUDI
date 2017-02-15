@@ -60,7 +60,8 @@
 	window.MOUSE = {
 	    x: 0, y: 0, down: false,
 	    downPos: { x: 0, y: 0 },
-	    upPos: { x: 0, y: 0 }
+	    upPos: { x: 0, y: 0 },
+	    scene: { x: 0, y: 0, z: 0 }
 	};
 
 	// Goudi
@@ -244,8 +245,19 @@
 	        });
 	        // Mouse hover and click detect
 	        window.addEventListener('mousemove', function (e) {
+	            // Calculating Mouse Position on screen
 	            window.MOUSE.x = e.clientX;
 	            window.MOUSE.y = e.clientY;
+	            // Calculating Mouse Position on 3D Scene of Space
+	            var vector = new THREE.Vector3();
+	            vector.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1, 0.5);
+	            vector.unproject(_this.camera);
+	            var dir = vector.sub(_this.camera.position).normalize();
+	            var distance = -_this.camera.position.z / dir.z;
+	            var pos = _this.camera.position.clone().add(dir.multiplyScalar(distance));
+	            window.MOUSE.scene.x = pos.x;
+	            window.MOUSE.scene.y = pos.y;
+	            window.MOUSE.scene.z = pos.z;
 	        });
 	        window.addEventListener('mousedown', function (e) {
 	            window.MOUSE.down = true;

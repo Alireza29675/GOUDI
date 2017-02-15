@@ -62,8 +62,19 @@ class Scene {
         window.addEventListener('mousewheel', e => { this.onMouseWheel(e) })
         // Mouse hover and click detect
         window.addEventListener('mousemove', e => {
+            // Calculating Mouse Position on screen
             window.MOUSE.x = e.clientX
             window.MOUSE.y = e.clientY
+            // Calculating Mouse Position on 3D Scene of Space
+            const vector = new THREE.Vector3()
+            vector.set((e.clientX / window.innerWidth)*2 - 1, -(e.clientY / window.innerHeight)*2 + 1, 0.5)
+            vector.unproject(this.camera)
+            const dir = vector.sub(this.camera.position).normalize()
+            const distance = -this.camera.position.z / dir.z
+            const pos = this.camera.position.clone().add(dir.multiplyScalar(distance))
+            window.MOUSE.scene.x = pos.x
+            window.MOUSE.scene.y = pos.y
+            window.MOUSE.scene.z = pos.z
         })
         window.addEventListener('mousedown', e => {
             window.MOUSE.down = true
