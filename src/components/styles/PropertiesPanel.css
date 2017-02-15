@@ -26,9 +26,14 @@
     cursor: pointer;
     background: linear-gradient(#555, #555, #333);
     border-radius: 10px;
+    transition-duration: 0.2s;
 }
 .panel > .header:hover {
     opacity: 0.9;
+}
+.panel > .header:active {
+    opacity: 0.5;
+    transform: scale(0.98);
 }
 .panel > .header > i {
     margin: 5px;

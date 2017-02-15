@@ -55,7 +55,7 @@ class Scene {
         d.connectTo(b)
         d.connectTo({x: -100, y: 250, z: 0 })
         // Set Focus Node
-        this.focusNode = null
+        this.focusedNode = null
         this.nodesManage.loadNodeManageStatus()
         // add zoom out and in on mouse wheel
         window.addEventListener('mousewheel', e => { this.onMouseWheel(e) })
@@ -120,9 +120,18 @@ class Scene {
         , 10)
     }
     focusCameraOn (node) {
-        this.focusNode = node
-        this.nodesManage.onFocusOnNode(node)
-        this.lookToNode(node)
+        if (node !== null) {
+            this.focusedNode = node
+            this.nodesManage.onFocusOnNode(node)
+            this.lookToNode(node)
+        } else {
+            this.focusedNode = null
+            this.nodesManage.storeNodeManageStatus(null)
+            document.querySelector('.panel').classList.remove('show')
+            this.wishCameraPosition = {x: 0, y: 0}
+            this.camera.position.set(0, 0, 1000)
+            this.storeCameraDataToLocalStorage()
+        }
     }
     lookToNode (node) {
         this.wishCameraPosition = {

@@ -118,6 +118,17 @@ class Node {
         for (let source of this.srcs) source.remove()
         this.nodeManage.removeNode(this)
     }
+    destroy () {
+        window.bindEvent.removeEventListener(this.mesh, 'click', e => { this.onClick(e) }, false)
+        window.bindEvent.removeEventListener(this.mesh, 'dblclick', e => { this.onDoubleClick(e) }, false)
+        window.bindEvent.removeEventListener(this.mesh, 'mousedown', e => { this.onMouseDown(e) }, false)
+        window.bindEvent.removeEventListener(this.mesh, 'mouseup', e => { this.onMouseUp(e) }, false)
+        window.bindEvent.removeEventListener(this.mesh, 'mouseover', e => { this.onMouseOver(e) }, false)
+        window.bindEvent.removeEventListener(this.mesh, 'mouseout', e => { this.onMouseOut(e) }, false)
+        this.geometry = null
+        this.material = null
+        this.mesh = null
+    }
     fixVisibility () {
         this.getObject3D().visible = this.visible
         for (let refer of this.rfrs) refer.checkVisibility()
@@ -136,7 +147,7 @@ class Node {
         this.fixVisibility()
     }
     // Binding Events
-    onClick (e) { if (this.scene.focusNode !== this) this.scene.focusCameraOn(this) }
+    onClick (e) { if (this.scene.focusedNode !== this) this.scene.focusCameraOn(this) }
     onDoubleClick (e) {}
     onMouseOver (e) { document.body.style.cursor = 'pointer' }
     onMouseOut (e) { document.body.style.cursor = 'default' }
