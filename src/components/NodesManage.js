@@ -10,7 +10,46 @@ class NodesManage {
         this.scene = scene
         // Adding Properties Panel
         this.panel = new PropertiesPanel(this)
-        mousetrap.bind(['del', 'backspace'], () => { if (this.scene.focusedNode !== null) this.scene.focusedNode.remove() })
+        // add some hot keys
+        mousetrap.bind(['del', 'backspace'], () => {
+            if (this.scene.focusedNode !== null) this.scene.focusedNode.remove()
+        })
+        mousetrap.bind('right', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyX( parseFloat(this.scene.focusedNode.getProp('x')) + 20 )
+        }})
+        mousetrap.bind('shift+right', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyX( parseFloat(this.scene.focusedNode.getProp('x')) + 40 )
+        }})
+        mousetrap.bind('alt+right', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyX( parseFloat(this.scene.focusedNode.getProp('x')) + 10 )
+        }})
+        mousetrap.bind('left', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyX( parseFloat(this.scene.focusedNode.getProp('x')) - 20 )
+        }})
+        mousetrap.bind('shift+left', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyX( parseFloat(this.scene.focusedNode.getProp('x')) - 40 )
+        }})
+        mousetrap.bind('alt+left', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyX( parseFloat(this.scene.focusedNode.getProp('x')) - 10 )
+        }})
+        mousetrap.bind('up', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyY( parseFloat(this.scene.focusedNode.getProp('y')) + 20 )
+        }})
+        mousetrap.bind('shift+up', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyY( parseFloat(this.scene.focusedNode.getProp('y')) + 40 )
+        }})
+        mousetrap.bind('alt+up', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyY( parseFloat(this.scene.focusedNode.getProp('y')) + 10 )
+        }})
+        mousetrap.bind('down', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyY( parseFloat(this.scene.focusedNode.getProp('y')) - 20 )
+        }})
+        mousetrap.bind('shift+down', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyY( parseFloat(this.scene.focusedNode.getProp('y')) - 40 )
+        }})
+        mousetrap.bind('alt+down', () => { if (this.scene.focusedNode !== null) {
+            this.scene.focusedNode.setPropertyY( parseFloat(this.scene.focusedNode.getProp('y')) - 10 )
+        }})
     }
     // Set and Get Nodes Management
     addNode (props) {
@@ -68,7 +107,12 @@ class NodesManage {
     // Exploring and Focusing Management
     onFocusOnNode (node) {
         this.panel.focus(node)
+        // last focusedNode blurs
+        this.scene.focusedNode.onBlur()
+        node.onFocus()
+        // new node replaces to focusedNode
         this.scene.focusedNode = node
+        // store focusedNode
         this.storeNodeManageStatus()
     }
     // Connection Management

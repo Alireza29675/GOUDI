@@ -163,6 +163,12 @@ class Node {
         this.scene.isDragging = false
         this.lookAtMe()
     }
+    onFocus () {
+        // this.material.color.setHex(0xaabbee)
+    }
+    onBlur () {
+        // this.material.color.setHex(0xffffff)
+    }
 
     // Sources and Refers Handling
     connectTo (object) {

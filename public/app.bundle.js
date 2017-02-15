@@ -326,7 +326,6 @@
 	        key: 'focusCameraOn',
 	        value: function focusCameraOn(node) {
 	            if (node !== null) {
-	                this.focusedNode = node;
 	                this.nodesManage.onFocusOnNode(node);
 	                this.lookToNode(node);
 	            } else {
@@ -440,8 +439,69 @@
 	        this.scene = scene;
 	        // Adding Properties Panel
 	        this.panel = new _PropertiesPanel2.default(this);
+	        // add some hot keys
 	        _mousetrap2.default.bind(['del', 'backspace'], function () {
 	            if (_this.scene.focusedNode !== null) _this.scene.focusedNode.remove();
+	        });
+	        _mousetrap2.default.bind('right', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyX(parseFloat(_this.scene.focusedNode.getProp('x')) + 20);
+	            }
+	        });
+	        _mousetrap2.default.bind('shift+right', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyX(parseFloat(_this.scene.focusedNode.getProp('x')) + 40);
+	            }
+	        });
+	        _mousetrap2.default.bind('alt+right', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyX(parseFloat(_this.scene.focusedNode.getProp('x')) + 10);
+	            }
+	        });
+	        _mousetrap2.default.bind('left', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyX(parseFloat(_this.scene.focusedNode.getProp('x')) - 20);
+	            }
+	        });
+	        _mousetrap2.default.bind('shift+left', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyX(parseFloat(_this.scene.focusedNode.getProp('x')) - 40);
+	            }
+	        });
+	        _mousetrap2.default.bind('alt+left', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyX(parseFloat(_this.scene.focusedNode.getProp('x')) - 10);
+	            }
+	        });
+	        _mousetrap2.default.bind('up', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyY(parseFloat(_this.scene.focusedNode.getProp('y')) + 20);
+	            }
+	        });
+	        _mousetrap2.default.bind('shift+up', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyY(parseFloat(_this.scene.focusedNode.getProp('y')) + 40);
+	            }
+	        });
+	        _mousetrap2.default.bind('alt+up', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyY(parseFloat(_this.scene.focusedNode.getProp('y')) + 10);
+	            }
+	        });
+	        _mousetrap2.default.bind('down', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyY(parseFloat(_this.scene.focusedNode.getProp('y')) - 20);
+	            }
+	        });
+	        _mousetrap2.default.bind('shift+down', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyY(parseFloat(_this.scene.focusedNode.getProp('y')) - 40);
+	            }
+	        });
+	        _mousetrap2.default.bind('alt+down', function () {
+	            if (_this.scene.focusedNode !== null) {
+	                _this.scene.focusedNode.setPropertyY(parseFloat(_this.scene.focusedNode.getProp('y')) - 10);
+	            }
 	        });
 	    }
 	    // Set and Get Nodes Management
@@ -579,7 +639,12 @@
 	        key: 'onFocusOnNode',
 	        value: function onFocusOnNode(node) {
 	            this.panel.focus(node);
+	            // last focusedNode blurs
+	            this.scene.focusedNode.onBlur();
+	            node.onFocus();
+	            // new node replaces to focusedNode
 	            this.scene.focusedNode = node;
+	            // store focusedNode
 	            this.storeNodeManageStatus();
 	        }
 	        // Connection Management
@@ -1825,6 +1890,16 @@
 	            this.scene.isDragging = false;
 	            this.lookAtMe();
 	        }
+	    }, {
+	        key: 'onFocus',
+	        value: function onFocus() {
+	            // this.material.color.setHex(0xaabbee)
+	        }
+	    }, {
+	        key: 'onBlur',
+	        value: function onBlur() {}
+	        // this.material.color.setHex(0xffffff)
+
 
 	        // Sources and Refers Handling
 

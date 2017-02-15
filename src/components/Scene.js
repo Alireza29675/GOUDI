@@ -121,7 +121,6 @@ class Scene {
     }
     focusCameraOn (node) {
         if (node !== null) {
-            this.focusedNode = node
             this.nodesManage.onFocusOnNode(node)
             this.lookToNode(node)
         } else {
