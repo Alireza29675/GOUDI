@@ -108,7 +108,7 @@ class NodesManage {
     onFocusOnNode (node) {
         this.panel.focus(node)
         // last focusedNode blurs
-        this.scene.focusedNode.onBlur()
+        if (this.scene.focusedNode !== null) this.scene.focusedNode.onBlur()
         node.onFocus()
         // new node replaces to focusedNode
         this.scene.focusedNode = node

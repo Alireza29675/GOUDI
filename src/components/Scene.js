@@ -14,6 +14,7 @@ class Scene {
         this.object = new THREE.Scene()
         // Adding Camera
         this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000)
+        this.camera.position.set(0, 0, 1000)
         // defining Handler of Dom Events
         window.bindEvent = new THREEx.DomEvents(this.camera, this.renderer.domElement)
         // set camera status from localStorage

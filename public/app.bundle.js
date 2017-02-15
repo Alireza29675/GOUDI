@@ -212,6 +212,7 @@
 	        this.object = new THREE.Scene();
 	        // Adding Camera
 	        this.camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 30000);
+	        this.camera.position.set(0, 0, 1000);
 	        // defining Handler of Dom Events
 	        window.bindEvent = new THREEx.DomEvents(this.camera, this.renderer.domElement);
 	        // set camera status from localStorage
@@ -640,7 +641,7 @@
 	        value: function onFocusOnNode(node) {
 	            this.panel.focus(node);
 	            // last focusedNode blurs
-	            this.scene.focusedNode.onBlur();
+	            if (this.scene.focusedNode !== null) this.scene.focusedNode.onBlur();
 	            node.onFocus();
 	            // new node replaces to focusedNode
 	            this.scene.focusedNode = node;
