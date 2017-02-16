@@ -29,6 +29,7 @@
     "webpack": "^1.14.0"
   },
   "dependencies": {
-    "express": "^4.14.1"
+    "express": "^4.14.1",
+    "mousetrap": "*"
   }
 }

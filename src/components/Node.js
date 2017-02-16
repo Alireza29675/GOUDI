@@ -42,7 +42,7 @@ class Node {
         // Node Material
         this.material = new THREE.MeshStandardMaterial({
             transparent: true,
-            opacity: 0.3,
+            opacity: this.nodeManage !== 'GHOST' ? 0.3 : 0.1,
             roughness: 0.7,
             metalness: 0.5
         })
@@ -61,18 +61,20 @@ class Node {
             z: 0
         }, 1)
         // Binding mouse actions to Node
-        window.bindEvent.addEventListener(this.mesh, 'click', e => { this.onClick(e) }, false)
-        window.bindEvent.addEventListener(this.mesh, 'dblclick', e => { this.onDoubleClick(e) }, false)
-        window.bindEvent.addEventListener(this.mesh, 'mousedown', e => { this.onMouseDown(e) }, false)
-        window.bindEvent.addEventListener(this.mesh, 'mouseup', e => { this.onMouseUp(e) }, false)
-        window.bindEvent.addEventListener(this.mesh, 'mouseover', e => { this.onMouseOver(e) }, false)
-        window.bindEvent.addEventListener(this.mesh, 'mouseout', e => { this.onMouseOut(e) }, false)
+        if (this.nodeManage !== 'GHOST') {
+            window.bindEvent.addEventListener(this.mesh, 'click', e => { this.onClick(e) }, false)
+            window.bindEvent.addEventListener(this.mesh, 'dblclick', e => { this.onDoubleClick(e) }, false)
+            window.bindEvent.addEventListener(this.mesh, 'mousedown', e => { this.onMouseDown(e) }, false)
+            window.bindEvent.addEventListener(this.mesh, 'mouseup', e => { this.onMouseUp(e) }, false)
+            window.bindEvent.addEventListener(this.mesh, 'mouseover', e => { this.onMouseOver(e) }, false)
+            window.bindEvent.addEventListener(this.mesh, 'mouseout', e => { this.onMouseOut(e) }, false)
+        }
     }
     setInitialProps (props) {
         for (let prop in props) this.setProp(prop, props[prop], false)
     }
     setProp (prop, value, pushToPanel = true) {
-        if (pushToPanel) this.nodeManage.panel.onPropSet(prop, value)
+        if (pushToPanel && this.nodeManage !== 'GHOST') this.nodeManage.panel.onPropSet(prop, value)
         this.props[prop].value = value
     }
     getProp (prop) {
@@ -95,7 +97,7 @@ class Node {
         for (let source of this.srcs) source.fix()
     }
     lookAtMe () {
-        this.scene.lookToNode(this)
+        if (this.nodeManage !== 'GHOST') this.scene.lookToNode(this)
     }
     addText (text) {
         this.text = new GLText(text, this.size)
@@ -131,7 +133,7 @@ class Node {
     remove () {
         for (let refer of this.rfrs) refer.remove()
         for (let source of this.srcs) source.remove()
-        this.nodeManage.removeNode(this)
+        if (this.nodeManage !== 'GHOST') this.nodeManage.removeNode(this)
     }
     destroy () {
         window.bindEvent.removeEventListener(this.mesh, 'click', e => { this.onClick(e) }, false)
@@ -164,8 +166,14 @@ class Node {
     // Binding Events
     onClick (e) { if (this.scene.focusedNode !== this) this.scene.focusCameraOn(this) }
     onDoubleClick (e) {}
-    onMouseOver (e) { document.body.style.cursor = 'pointer' }
-    onMouseOut (e) { document.body.style.cursor = 'default' }
+    onMouseOver (e) {
+        document.body.style.cursor = 'pointer'
+        window.MOUSE.hoverOn = this
+    }
+    onMouseOut (e) {
+        document.body.style.cursor = 'default'
+        if (window.MOUSE.hoverOn == this) window.MOUSE.hoverOn = null
+    }
     onMouseDown (e) {}
     onMouseUp (e) {}
     onDragging () {
@@ -173,6 +181,9 @@ class Node {
         this.setPropertyX(x, false)
         this.setPropertyY(y, false)
         this.scene.isDragging = true
+    }
+    onDragStart () {
+        if (window.KEYBOARD.checkPressed('Shift')) this.scene.disableEditingMode()
     }
     onDragEnd () {
         this.scene.isDragging = false
@@ -188,11 +199,11 @@ class Node {
     // Sources and Refers Handling
     connectTo (object) {
         let arrow = null
-        arrow = this.nodeManage.connect(this, object)
+        if (this.nodeManage !== 'GHOST') arrow = this.nodeManage.connect(this, object)
         return arrow
     }
-    refreshRefers () { this.rfrs = this.nodeManage.getArrowByFrom(this) }
-    refreshSources () { this.srcs = this.nodeManage.getArrowByTo(this) }
+    refreshRefers () { if (this.nodeManage !== 'GHOST') this.rfrs = this.nodeManage.getArrowByFrom(this) }
+    refreshSources () { if (this.nodeManage !== 'GHOST') this.srcs = this.nodeManage.getArrowByTo(this) }
 
     // Properties set
     setPropertyText (value) {

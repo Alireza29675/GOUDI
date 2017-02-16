@@ -5,8 +5,16 @@ window.MOUSE = {
     x: 0, y: 0, down: false,
     downPos: {x: 0, y: 0},
     upPos: {x: 0, y: 0},
-    scene: {x: 0, y: 0, z: 0}
+    scene: {x: 0, y: 0, z: 0},
+    hoverOn: null
 }
+// Initializing keyboard status
+window.KEYBOARD = {
+    keysPressed: {},
+    checkPressed: (key) => window.KEYBOARD.keysPressed[key] === true
+}
+window.addEventListener('keydown', e => window.KEYBOARD.keysPressed[e.key] = true)
+window.addEventListener('keyup', e => window.KEYBOARD.keysPressed[e.key] = false)
 
 // Goudi
 class Goudi {

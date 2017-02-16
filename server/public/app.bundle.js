@@ -61,8 +61,22 @@
 	    x: 0, y: 0, down: false,
 	    downPos: { x: 0, y: 0 },
 	    upPos: { x: 0, y: 0 },
-	    scene: { x: 0, y: 0, z: 0 }
+	    scene: { x: 0, y: 0, z: 0 },
+	    hoverOn: null
 	};
+	// Initializing keyboard status
+	window.KEYBOARD = {
+	    keysPressed: {},
+	    checkPressed: function checkPressed(key) {
+	        return window.KEYBOARD.keysPressed[key] === true;
+	    }
+	};
+	window.addEventListener('keydown', function (e) {
+	    return window.KEYBOARD.keysPressed[e.key] = true;
+	});
+	window.addEventListener('keyup', function (e) {
+	    return window.KEYBOARD.keysPressed[e.key] = false;
+	});
 
 	// Goudi
 
@@ -172,6 +186,10 @@
 
 	var _NodesManage2 = _interopRequireDefault(_NodesManage);
 
+	var _Node = __webpack_require__(11);
+
+	var _Node2 = _interopRequireDefault(_Node);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -203,41 +221,37 @@
 	        // set camera status from localStorage
 	        this.wishCameraPosition = { x: 0, y: 0 };
 	        this.loadStoredCameraDataFromLocalStorage();
+	        // Ghost node
+	        this.ghostNode = new _Node2.default('GHOST', { text: 'New Node', x: 0, y: 0, initialSize: 50 });
+	        this.object.add(this.ghostNode.getObject3D());
 	        // Adding lights to Scene
 	        this.object.add(_Lights2.default.globalAmbient);
 	        this.object.add(_Lights2.default.topLight);
 	        this.object.add(_Lights2.default.bottomLight);
+	        // Handling adding nodes by User
+	        window.addEventListener('click', function (e) {
+	            if (window.KEYBOARD.checkPressed('Meta') || window.KEYBOARD.checkPressed('Control')) {
+	                _this.nodesManage.addNode({
+	                    text: '',
+	                    x: window.MOUSE.scene.x,
+	                    y: window.MOUSE.scene.y,
+	                    initialSize: 50
+	                });
+	            }
+	        });
 	        // Adding nodes to Scene
 	        this.nodesManage = new _NodesManage2.default(this);
-	        var a = this.nodesManage.addNode({
-	            text: 'Programming',
-	            x: 200,
-	            y: -50,
-	            initialSize: 50
-	        });
 	        var b = this.nodesManage.addNode({
+	            id: 0,
 	            text: 'Application',
 	            x: 0,
 	            y: 50,
 	            initialSize: 100
 	        });
-	        var c = this.nodesManage.addNode({
-	            text: 'Manage',
-	            x: -200,
-	            y: -200,
-	            initialSize: 50
-	        });
-	        var d = this.nodesManage.addNode({
-	            text: 'Marketing',
-	            x: -200,
-	            y: 200,
-	            initialSize: 50
-	        });
 	        a.connectTo(b);
 	        c.connectTo(a);
 	        c.connectTo(b);
 	        d.connectTo(b);
-	        d.connectTo({ x: -100, y: 250, z: 0 });
 	        // Set Focus Node
 	        this.focusedNode = null;
 	        this.nodesManage.loadNodeManageStatus();
@@ -271,6 +285,10 @@
 	            window.MOUSE.upPos.x = e.clientX;
 	            window.MOUSE.upPos.y = e.clientY;
 	        });
+	        // Handling making connection with Shift key
+	        window.addEventListener('keydown', function (e) {
+	            if (e.key == 'Shift' && window.MOUSE.hoverOn instanceof _Node2.default) window.MOUSE.hoverOn.connectTo('MOUSE');
+	        });
 	    }
 
 	    _createClass(Scene, [{
@@ -283,17 +301,6 @@
 	        key: 'onMouseWheel',
 	        value: function onMouseWheel(e) {
 	            this.camera.position.z -= e.deltaY;
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            this.frame++;
-	            // Flow rendering to Node Management
-	            this.nodesManage.render();
-	            // Ease positions with animations relating to mouse movement
-	            this.easeParameters();
-	            // Store camera data in every frame
-	            if (this.frame % 300 === 0 && !this.isDragging) this.storeCameraDataToLocalStorage();
 	        }
 	        // Disable and Enable Editing
 
@@ -315,8 +322,36 @@
 	                this.nodesManage.panel.activate();
 	            }
 	        }
-	        // Format Camera
+	        // Flow code in every frame
 
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            this.frame++;
+	            // Handle Ghost Node
+	            this.handleGhostNode();
+	            // Flow rendering to Node Management
+	            this.nodesManage.render();
+	            // Ease positions with animations relating to mouse movement
+	            this.easeParameters();
+	            // Store camera data in every frame
+	            if (this.frame % 300 === 0 && !this.isDragging) this.storeCameraDataToLocalStorage();
+	        }
+	    }, {
+	        key: 'handleGhostNode',
+	        value: function handleGhostNode() {
+	            this.ghostNode.setPropertyX(window.MOUSE.scene.x);
+	            this.ghostNode.setPropertyY(window.MOUSE.scene.y);
+	            if (window.KEYBOARD.checkPressed('Meta') || window.KEYBOARD.checkPressed('Control')) {
+	                this.disableEditingMode();
+	                this.ghostNode.getObject3D().visible = true;
+	                this.renderer.domElement.style.cursor = 'copy';
+	            } else {
+	                this.enableEditingMode();
+	                this.ghostNode.getObject3D().visible = false;
+	                this.renderer.domElement.style.cursor = 'default';
+	            }
+	        }
 	    }, {
 	        key: 'easeParameters',
 	        value: function easeParameters() {
@@ -534,10 +569,10 @@
 	            var id = 0;
 	            while (this.nodes[id] !== undefined) {
 	                id++;
-	            }Object.assign(props, { id: id });
+	            }props = Object.assign({ id: id }, props);
 	            var node = new _Node2.default(this, props);
 	            this.scene.object.add(node.getObject3D());
-	            this.nodes[id] = node;
+	            this.nodes[props.id] = node;
 	            this.makeDraggable();
 	            return node;
 	        }
@@ -553,6 +588,9 @@
 	            this.DragControl = new THREE.DragControls(nodesObjects, this.scene.camera, this.scene.renderer.domElement);
 	            this.DragControl.addEventListener('drag', function (e) {
 	                _this2.getByUUID(e.object.uuid).onDragging();
+	            });
+	            this.DragControl.addEventListener('dragstart', function (e) {
+	                _this2.getByUUID(e.object.uuid).onDragStart();
 	            });
 	            this.DragControl.addEventListener('dragend', function (e) {
 	                _this2.getByUUID(e.object.uuid).onDragEnd();
@@ -752,7 +790,7 @@
 	            if (localStorage.getItem('nodemanage') !== null) {
 	                var storedData = JSON.parse(localStorage.getItem('nodemanage'));
 	                var focusedNodeId = storedData.focusedNodeId;
-	                if (focusedNodeId !== null) this.scene.focusedNode = this.get(parseInt(focusedNodeId));else this.scene.focusedNode = null;
+	                if (focusedNodeId !== null) this.scene.focusedNode = this.get(parseInt(focusedNodeId)) || null;else this.scene.focusedNode = null;
 	                this.scene.focusCameraOn(this.scene.focusedNode);
 	            }
 	        }
@@ -1575,7 +1613,7 @@
 	        // Node Material
 	        this.material = new THREE.MeshStandardMaterial({
 	            transparent: true,
-	            opacity: 0.3,
+	            opacity: this.nodeManage !== 'GHOST' ? 0.3 : 0.1,
 	            roughness: 0.7,
 	            metalness: 0.5
 	        });
@@ -1594,24 +1632,26 @@
 	            z: 0
 	        }, 1);
 	        // Binding mouse actions to Node
-	        window.bindEvent.addEventListener(this.mesh, 'click', function (e) {
-	            _this.onClick(e);
-	        }, false);
-	        window.bindEvent.addEventListener(this.mesh, 'dblclick', function (e) {
-	            _this.onDoubleClick(e);
-	        }, false);
-	        window.bindEvent.addEventListener(this.mesh, 'mousedown', function (e) {
-	            _this.onMouseDown(e);
-	        }, false);
-	        window.bindEvent.addEventListener(this.mesh, 'mouseup', function (e) {
-	            _this.onMouseUp(e);
-	        }, false);
-	        window.bindEvent.addEventListener(this.mesh, 'mouseover', function (e) {
-	            _this.onMouseOver(e);
-	        }, false);
-	        window.bindEvent.addEventListener(this.mesh, 'mouseout', function (e) {
-	            _this.onMouseOut(e);
-	        }, false);
+	        if (this.nodeManage !== 'GHOST') {
+	            window.bindEvent.addEventListener(this.mesh, 'click', function (e) {
+	                _this.onClick(e);
+	            }, false);
+	            window.bindEvent.addEventListener(this.mesh, 'dblclick', function (e) {
+	                _this.onDoubleClick(e);
+	            }, false);
+	            window.bindEvent.addEventListener(this.mesh, 'mousedown', function (e) {
+	                _this.onMouseDown(e);
+	            }, false);
+	            window.bindEvent.addEventListener(this.mesh, 'mouseup', function (e) {
+	                _this.onMouseUp(e);
+	            }, false);
+	            window.bindEvent.addEventListener(this.mesh, 'mouseover', function (e) {
+	                _this.onMouseOver(e);
+	            }, false);
+	            window.bindEvent.addEventListener(this.mesh, 'mouseout', function (e) {
+	                _this.onMouseOut(e);
+	            }, false);
+	        }
 	    }
 
 	    _createClass(Node, [{
@@ -1626,7 +1666,7 @@
 	        value: function setProp(prop, value) {
 	            var pushToPanel = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
-	            if (pushToPanel) this.nodeManage.panel.onPropSet(prop, value);
+	            if (pushToPanel && this.nodeManage !== 'GHOST') this.nodeManage.panel.onPropSet(prop, value);
 	            this.props[prop].value = value;
 	        }
 	    }, {
@@ -1705,7 +1745,7 @@
 	    }, {
 	        key: 'lookAtMe',
 	        value: function lookAtMe() {
-	            this.scene.lookToNode(this);
+	            if (this.nodeManage !== 'GHOST') this.scene.lookToNode(this);
 	        }
 	    }, {
 	        key: 'addText',
@@ -1801,7 +1841,7 @@
 	                }
 	            }
 
-	            this.nodeManage.removeNode(this);
+	            if (this.nodeManage !== 'GHOST') this.nodeManage.removeNode(this);
 	        }
 	    }, {
 	        key: 'destroy',
@@ -1914,11 +1954,13 @@
 	        key: 'onMouseOver',
 	        value: function onMouseOver(e) {
 	            document.body.style.cursor = 'pointer';
+	            window.MOUSE.hoverOn = this;
 	        }
 	    }, {
 	        key: 'onMouseOut',
 	        value: function onMouseOut(e) {
 	            document.body.style.cursor = 'default';
+	            if (window.MOUSE.hoverOn == this) window.MOUSE.hoverOn = null;
 	        }
 	    }, {
 	        key: 'onMouseDown',
@@ -1937,6 +1979,11 @@
 	            this.setPropertyX(x, false);
 	            this.setPropertyY(y, false);
 	            this.scene.isDragging = true;
+	        }
+	    }, {
+	        key: 'onDragStart',
+	        value: function onDragStart() {
+	            if (window.KEYBOARD.checkPressed('Shift')) this.scene.disableEditingMode();
 	        }
 	    }, {
 	        key: 'onDragEnd',
@@ -1961,18 +2008,18 @@
 	        key: 'connectTo',
 	        value: function connectTo(object) {
 	            var arrow = null;
-	            arrow = this.nodeManage.connect(this, object);
+	            if (this.nodeManage !== 'GHOST') arrow = this.nodeManage.connect(this, object);
 	            return arrow;
 	        }
 	    }, {
 	        key: 'refreshRefers',
 	        value: function refreshRefers() {
-	            this.rfrs = this.nodeManage.getArrowByFrom(this);
+	            if (this.nodeManage !== 'GHOST') this.rfrs = this.nodeManage.getArrowByFrom(this);
 	        }
 	    }, {
 	        key: 'refreshSources',
 	        value: function refreshSources() {
-	            this.srcs = this.nodeManage.getArrowByTo(this);
+	            if (this.nodeManage !== 'GHOST') this.srcs = this.nodeManage.getArrowByTo(this);
 	        }
 
 	        // Properties set
@@ -2136,6 +2183,9 @@
 	        _classCallCheck(this, Arrow);
 
 	        this.nodeManage = nodeManage;
+	        // listener functions
+	        this.fixListener = this.fix.bind(this);
+	        this.checkStickListener = this.checkStick.bind(this);
 	        // Initializing from and to for Nodes and Pos-Objects
 	        this.setFrom(from);
 	        this.setTo(to);
@@ -2173,12 +2223,34 @@
 	    }, {
 	        key: 'setTo',
 	        value: function setTo(to) {
+	            window.removeEventListener('mousemove', this.fixListener, false);
 	            if (to instanceof _Node2.default) {
 	                this.to = to;
 	                to.refreshSources();
+	            } else if (to == 'MOUSE') {
+	                this.to = { type: 'MOUSE', size: 0 };
+	                window.addEventListener('mousemove', this.fixListener, false);
+	                window.addEventListener('keyup', this.checkStickListener, false);
 	            } else {
 	                to = Object.assign({ x: 0, y: 0, z: 0 }, to);
 	                this.to = { position: to, size: 0 };
+	            }
+	        }
+	        // Handle sticking arrow to Nodes
+
+	    }, {
+	        key: 'checkStick',
+	        value: function checkStick(e) {
+	            if (e.key == 'Shift') {
+	                window.removeEventListener('keyup', this.checkStickListener, false);
+	                if (window.MOUSE.hoverOn instanceof _Node2.default && // check Shift upped on a node
+	                this.from !== window.MOUSE.hoverOn && // check hoverOn node should dont be from Node
+	                this.nodeManage.getArrowByFromAndTo(this.from, window.MOUSE.hoverOn).length == 0 // check that there's no arrow like this
+	                ) {
+	                        console.log('new arrow');
+	                        this.setTo(window.MOUSE.hoverOn);
+	                        this.fix();
+	                    } else this.remove();
 	            }
 	        }
 	        // fixing position and rotation of arrow
@@ -2186,6 +2258,13 @@
 	    }, {
 	        key: 'fix',
 	        value: function fix() {
+	            if (this.to.type == 'MOUSE') {
+	                this.to.position = {
+	                    x: window.MOUSE.scene.x,
+	                    y: window.MOUSE.scene.y,
+	                    z: this.from.position.z
+	                };
+	            }
 	            // Calculating distances
 	            var deltaX = this.to.position.x - this.from.position.x;
 	            var deltaY = this.to.position.y - this.from.position.y;

@@ -1,5 +1,6 @@
 import lights from './Lights'
 import NodesManage from './NodesManage'
+import Node from './Node'
 
 const ease = (from, to, rate = 6) => {
     return from + (to - from) / rate
@@ -22,41 +23,37 @@ class Scene {
         // set camera status from localStorage
         this.wishCameraPosition = { x: 0, y: 0 }
         this.loadStoredCameraDataFromLocalStorage()
+        // Ghost node
+        this.ghostNode = new Node('GHOST', { text: 'New Node', x: 0, y: 0, initialSize: 50 })
+        this.object.add(this.ghostNode.getObject3D())
         // Adding lights to Scene
         this.object.add(lights.globalAmbient)
         this.object.add(lights.topLight)
         this.object.add(lights.bottomLight)
+        // Handling adding nodes by User
+        window.addEventListener('click', e => {
+            if (window.KEYBOARD.checkPressed('Meta') || window.KEYBOARD.checkPressed('Control')) {
+                this.nodesManage.addNode({
+                    text: '',
+                    x: window.MOUSE.scene.x,
+                    y: window.MOUSE.scene.y,
+                    initialSize: 50
+                })
+            }
+        })
         // Adding nodes to Scene
         this.nodesManage = new NodesManage(this)
-        const a = this.nodesManage.addNode({
-            text: 'Programming',
-            x: 200,
-            y: -50,
-            initialSize: 50
-        })
         const b = this.nodesManage.addNode({
+            id: 0,
             text: 'Application',
             x: 0,
             y: 50,
             initialSize: 100
         })
-        const c = this.nodesManage.addNode({
-            text: 'Manage',
-            x: -200,
-            y: -200,
-            initialSize: 50
-        })
-        const d = this.nodesManage.addNode({
-            text: 'Marketing',
-            x: -200,
-            y: 200,
-            initialSize: 50
-        })
         a.connectTo(b)
         c.connectTo(a)
         c.connectTo(b)
         d.connectTo(b)
-        d.connectTo({x: -100, y: 250, z: 0 })
         // Set Focus Node
         this.focusedNode = null
         this.nodesManage.loadNodeManageStatus()
@@ -88,6 +85,10 @@ class Scene {
             window.MOUSE.upPos.x = e.clientX
             window.MOUSE.upPos.y = e.clientY
         })
+        // Handling making connection with Shift key
+        window.addEventListener('keydown', e => {
+            if (e.key == 'Shift' && window.MOUSE.hoverOn instanceof Node) window.MOUSE.hoverOn.connectTo('MOUSE')
+        })
     }
     onResize (W, H) {
         this.camera.aspect	= W / H
@@ -95,15 +96,6 @@ class Scene {
     }
     onMouseWheel (e) {
         this.camera.position.z -= e.deltaY
-    }
-    render () {
-        this.frame++
-        // Flow rendering to Node Management
-        this.nodesManage.render()
-        // Ease positions with animations relating to mouse movement
-        this.easeParameters()
-        // Store camera data in every frame
-        if (this.frame % 300 === 0 && !this.isDragging) this.storeCameraDataToLocalStorage()
     }
     // Disable and Enable Editing
     disableEditingMode (force) {
@@ -120,7 +112,32 @@ class Scene {
             this.nodesManage.panel.activate()
         }
     }
-    // Format Camera
+    // Flow code in every frame
+    render () {
+        this.frame++
+        // Handle Ghost Node
+        this.handleGhostNode()
+        // Flow rendering to Node Management
+        this.nodesManage.render()
+        // Ease positions with animations relating to mouse movement
+        this.easeParameters()
+        // Store camera data in every frame
+        if (this.frame % 300 === 0 && !this.isDragging) this.storeCameraDataToLocalStorage()
+    }
+    handleGhostNode () {
+        this.ghostNode.setPropertyX(window.MOUSE.scene.x)
+        this.ghostNode.setPropertyY(window.MOUSE.scene.y)
+        if (window.KEYBOARD.checkPressed('Meta') || window.KEYBOARD.checkPressed('Control')) {
+            this.disableEditingMode()
+            this.ghostNode.getObject3D().visible = true
+            this.renderer.domElement.style.cursor = 'copy'
+        }
+        else {
+            this.enableEditingMode()
+            this.ghostNode.getObject3D().visible = false
+            this.renderer.domElement.style.cursor = 'default'
+        }
+    }
     easeParameters () {
         const W = window.innerWidth
         const H = window.innerHeight

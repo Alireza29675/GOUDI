@@ -55,10 +55,10 @@ class NodesManage {
     addNode (props) {
         let id = 0
         while (this.nodes[id] !== undefined) id++
-        Object.assign(props, {id: id})
+        props = Object.assign({id: id}, props)
         const node = new Node(this, props)
         this.scene.object.add(node.getObject3D())
-        this.nodes[id] = node
+        this.nodes[props.id] = node
         this.makeDraggable()
         return node
     }
@@ -67,6 +67,7 @@ class NodesManage {
         const nodesObjects = this.getAllNodes().map((node) => node.getObject3D())
         this.DragControl = new THREE.DragControls(nodesObjects, this.scene.camera, this.scene.renderer.domElement)
         this.DragControl.addEventListener('drag', (e)=>{ this.getByUUID(e.object.uuid).onDragging() })
+        this.DragControl.addEventListener('dragstart', (e)=>{ this.getByUUID(e.object.uuid).onDragStart() })
         this.DragControl.addEventListener('dragend', (e)=>{ this.getByUUID(e.object.uuid).onDragEnd() })
     }
     removeNode (node) {
@@ -153,7 +154,7 @@ class NodesManage {
         if (localStorage.getItem('nodemanage') !== null) {
             const storedData = JSON.parse(localStorage.getItem('nodemanage'))
             const focusedNodeId = storedData.focusedNodeId
-            if (focusedNodeId !== null) this.scene.focusedNode = this.get(parseInt(focusedNodeId))
+            if (focusedNodeId !== null) this.scene.focusedNode = this.get(parseInt(focusedNodeId)) || null
             else this.scene.focusedNode = null
             this.scene.focusCameraOn(this.scene.focusedNode)
         }

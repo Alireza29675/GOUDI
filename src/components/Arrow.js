@@ -5,6 +5,9 @@ import Node from './Node'
 class Arrow {
     constructor (nodeManage, from = {x: 0, y: 0, z: 0}, to = {x: 0, y: 0, z: 0}) {
         this.nodeManage = nodeManage
+        // listener functions
+        this.fixListener = this.fix.bind(this)
+        this.checkStickListener = this.checkStick.bind(this)
         // Initializing from and to for Nodes and Pos-Objects
         this.setFrom(from)
         this.setTo(to)
@@ -36,17 +39,46 @@ class Arrow {
     }
     // change to to another Node or Pos-Object
     setTo (to) {
+        window.removeEventListener('mousemove', this.fixListener, false)
         if (to instanceof Node) {
             this.to = to
             to.refreshSources()
+        }
+        else if (to == 'MOUSE') {
+            this.to = { type: 'MOUSE', size: 0 }
+            window.addEventListener('mousemove', this.fixListener, false)
+            window.addEventListener('keyup', this.checkStickListener, false)
         }
         else {
             to = Object.assign({x: 0, y: 0, z: 0}, to)
             this.to = { position: to, size: 0 }
         }
     }
+    // Handle sticking arrow to Nodes
+    checkStick (e) {
+        if (e.key == 'Shift') {
+            window.removeEventListener('keyup', this.checkStickListener, false)
+            if (
+                window.MOUSE.hoverOn instanceof Node && // check Shift upped on a node
+                this.from !== window.MOUSE.hoverOn && // check hoverOn node should dont be from Node
+                this.nodeManage.getArrowByFromAndTo(this.from, window.MOUSE.hoverOn).length == 0 // check that there's no arrow like this
+            ) {
+                console.log('new arrow')
+                this.setTo(window.MOUSE.hoverOn)
+                this.fix()
+            }
+            else this.remove()
+        }
+    }
     // fixing position and rotation of arrow
     fix () {
+        if (this.to.type == 'MOUSE') {
+            this.to.position = {
+                x: window.MOUSE.scene.x,
+                y: window.MOUSE.scene.y,
+                z: this.from.position.z
+            }
+        }
         // Calculating distances
         let deltaX = this.to.position.x - this.from.position.x
         let deltaY = this.to.position.y - this.from.position.y
