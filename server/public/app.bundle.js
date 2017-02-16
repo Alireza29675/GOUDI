@@ -375,9 +375,11 @@
 	    }, {
 	        key: 'focusCameraOn',
 	        value: function focusCameraOn(node) {
+	            var shouldLookToNode = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
 	            if (node !== null) {
 	                this.nodesManage.onFocusOnNode(node);
-	                this.lookToNode(node);
+	                if (shouldLookToNode) this.lookToNode(node);
 	            } else {
 	                this.focusedNode = null;
 	                this.nodesManage.storeNodeManageStatus(null);
@@ -655,6 +657,13 @@
 	            return this.nodes[id];
 	        }
 	    }, {
+	        key: 'getAllNodes',
+	        value: function getAllNodes() {
+	            return this.nodes.filter(function (node) {
+	                return node instanceof _Node2.default;
+	            });
+	        }
+	    }, {
 	        key: 'getByUUID',
 	        value: function getByUUID(uuid) {
 	            var _iteratorNormalCompletion2 = true;
@@ -662,9 +671,9 @@
 	            var _iteratorError2 = undefined;
 
 	            try {
-	                for (var _iterator2 = this.nodes[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                for (var _iterator2 = this.getAllNodes()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	                    var node = _step2.value;
-	                    if (node instanceof _Node2.default) if (node.uuid == uuid) return node;
+	                    if (node.uuid == uuid) return node;
 	                }
 	            } catch (err) {
 	                _didIteratorError2 = true;
@@ -680,13 +689,6 @@
 	                    }
 	                }
 	            }
-	        }
-	    }, {
-	        key: 'getAllNodes',
-	        value: function getAllNodes() {
-	            return this.nodes.filter(function (node) {
-	                return node instanceof _Node2.default;
-	            });
 	        }
 	        // Exploring and Focusing Management
 
@@ -792,7 +794,55 @@
 	        }
 	    }, {
 	        key: 'render',
-	        value: function render() {}
+	        value: function render() {
+	            var _iteratorNormalCompletion3 = true;
+	            var _didIteratorError3 = false;
+	            var _iteratorError3 = undefined;
+
+	            try {
+	                for (var _iterator3 = this.getAllNodes()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                    var node = _step3.value;
+	                    node.render();
+	                }
+	            } catch (err) {
+	                _didIteratorError3 = true;
+	                _iteratorError3 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                        _iterator3.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError3) {
+	                        throw _iteratorError3;
+	                    }
+	                }
+	            }
+
+	            var _iteratorNormalCompletion4 = true;
+	            var _didIteratorError4 = false;
+	            var _iteratorError4 = undefined;
+
+	            try {
+	                for (var _iterator4 = this.getAllNodeToNodeArrows()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                    var arrow = _step4.value;
+	                    arrow.render();
+	                }
+	            } catch (err) {
+	                _didIteratorError4 = true;
+	                _iteratorError4 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                        _iterator4.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError4) {
+	                        throw _iteratorError4;
+	                    }
+	                }
+	            }
+	        }
 	    }]);
 
 	    return NodesManage;
@@ -1610,8 +1660,9 @@
 	        // Define srcs and rfrs objects
 	        this.rfrs = []; // refer arrows
 	        this.srcs = []; // source arrows
-	        // visibility
+	        // some parameters
 	        this.visible = true;
+	        this.hovered = false;
 	        // set initial props
 	        this.setInitialProps(initialProps);
 	        // Node Geometry
@@ -1951,7 +2002,10 @@
 	    }, {
 	        key: 'onClick',
 	        value: function onClick(e) {
-	            if (this.scene.focusedNode !== this) this.scene.focusCameraOn(this);
+	            // Remove if alt click on a node
+	            if (window.KEYBOARD.checkPressed('Alt')) this.remove();
+	            // if the focusedNode isn't me lets focus on me
+	            else if (this.scene.focusedNode !== this) this.scene.focusCameraOn(this);
 	        }
 	    }, {
 	        key: 'onDoubleClick',
@@ -1961,12 +2015,14 @@
 	        value: function onMouseOver(e) {
 	            document.body.style.cursor = 'pointer';
 	            window.MOUSE.hoverOn = this;
+	            this.hovered = true;
 	        }
 	    }, {
 	        key: 'onMouseOut',
 	        value: function onMouseOut(e) {
 	            document.body.style.cursor = 'default';
 	            if (window.MOUSE.hoverOn == this) window.MOUSE.hoverOn = null;
+	            this.hovered = false;
 	        }
 	    }, {
 	        key: 'onMouseDown',
@@ -1989,7 +2045,7 @@
 	    }, {
 	        key: 'onDragStart',
 	        value: function onDragStart() {
-	            if (window.KEYBOARD.checkPressed('Shift')) this.scene.disableEditingMode();
+	            if (this.scene.focusedNode !== this) this.scene.focusCameraOn(this, false);
 	        }
 	    }, {
 	        key: 'onDragEnd',
@@ -2058,6 +2114,12 @@
 	            this.position.y = value;
 	            this.fixPosition({ y: value });
 	            if (lookAtMe) this.lookAtMe();
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            // Deleting Danger Detection
+	            if (window.KEYBOARD.checkPressed('Alt') && this.hovered) this.material.color.setHex(0xff0000);else this.material.color.setHex(0xffffff);
 	        }
 	    }]);
 
@@ -2183,6 +2245,8 @@
 	// Arrow Class
 	var Arrow = function () {
 	    function Arrow(nodeManage) {
+	        var _this = this;
+
 	        var from = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { x: 0, y: 0, z: 0 };
 	        var to = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { x: 0, y: 0, z: 0 };
 
@@ -2207,6 +2271,25 @@
 	        // Sticking to make an arrow
 	        this.arrow.add(this.cone);
 	        this.arrow.add(this.cylinder);
+	        // binding mouse events
+	        window.bindEvent.addEventListener(this.cone, 'click', function (e) {
+	            _this.onClick(e);
+	        }, false);
+	        window.bindEvent.addEventListener(this.cylinder, 'click', function (e) {
+	            _this.onClick(e);
+	        }, false);
+	        window.bindEvent.addEventListener(this.cone, 'mouseover', function (e) {
+	            _this.onMouseOver(e);
+	        }, false);
+	        window.bindEvent.addEventListener(this.cylinder, 'mouseover', function (e) {
+	            _this.onMouseOver(e);
+	        }, false);
+	        window.bindEvent.addEventListener(this.cone, 'mouseout', function (e) {
+	            _this.onMouseOut(e);
+	        }, false);
+	        window.bindEvent.addEventListener(this.cylinder, 'mouseout', function (e) {
+	            _this.onMouseOut(e);
+	        }, false);
 	        // fixing position and rotation
 	        this.fix();
 	    }
@@ -2354,6 +2437,26 @@
 	        value: function remove() {
 	            this.nodeManage.removeArrow(this);
 	        }
+	        // Mouse Events
+
+	    }, {
+	        key: 'onClick',
+	        value: function onClick() {
+	            // Remove if alt click on a node
+	            if (window.KEYBOARD.checkPressed('Alt')) this.remove();
+	        }
+	    }, {
+	        key: 'onMouseOver',
+	        value: function onMouseOver(e) {
+	            window.MOUSE.hoverOn = this;
+	            this.hovered = true;
+	        }
+	    }, {
+	        key: 'onMouseOut',
+	        value: function onMouseOut(e) {
+	            if (window.MOUSE.hoverOn == this) window.MOUSE.hoverOn = null;
+	            this.hovered = false;
+	        }
 	        // set Object3D position and rotation
 
 	    }, {
@@ -2375,6 +2478,20 @@
 	        key: 'rotateZ',
 	        value: function rotateZ(deg) {
 	            this.getObject3D().rotation.z = deg - Math.PI / 2;
+	        }
+	        // render
+
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            // Deleting Danger Detection
+	            if (window.KEYBOARD.checkPressed('Alt') && this.hovered) {
+	                this.material.color.setHex(0xff0000);
+	                document.body.style.cursor = 'pointer';
+	            } else {
+	                this.material.color.setHex(0xffffff);
+	                document.body.style.cursor = 'default';
+	            }
 	        }
 	    }]);
 

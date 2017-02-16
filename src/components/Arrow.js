@@ -23,6 +23,13 @@ class Arrow {
         // Sticking to make an arrow
         this.arrow.add(this.cone)
         this.arrow.add(this.cylinder)
+        // binding mouse events
+        window.bindEvent.addEventListener(this.cone, 'click', e => { this.onClick(e) }, false)
+        window.bindEvent.addEventListener(this.cylinder, 'click', e => { this.onClick(e) }, false)
+        window.bindEvent.addEventListener(this.cone, 'mouseover', e => { this.onMouseOver(e) }, false)
+        window.bindEvent.addEventListener(this.cylinder, 'mouseover', e => { this.onMouseOver(e) }, false)
+        window.bindEvent.addEventListener(this.cone, 'mouseout', e => { this.onMouseOut(e) }, false)
+        window.bindEvent.addEventListener(this.cylinder, 'mouseout', e => { this.onMouseOut(e) }, false)
         // fixing position and rotation
         this.fix()
     }
@@ -145,11 +152,36 @@ class Arrow {
     getObject3D () { return this.arrow }
     // remove Object3D
     remove () { this.nodeManage.removeArrow(this) }
+    // Mouse Events
+    onClick () {
+        // Remove if alt click on a node
+        if (window.KEYBOARD.checkPressed('Alt')) this.remove()
+    }
+    onMouseOver (e) {
+        window.MOUSE.hoverOn = this
+        this.hovered = true
+    }
+    onMouseOut (e) {
+        if (window.MOUSE.hoverOn == this) window.MOUSE.hoverOn = null
+        this.hovered = false
+    }
     // set Object3D position and rotation
     setX (x) { this.getObject3D().position.x = x }
     setY (y) { this.getObject3D().position.y = y }
     setZ (z) { this.getObject3D().position.z = z + 5 }
     rotateZ (deg) { this.getObject3D().rotation.z = deg - Math.PI/2 }
+    // render
+    render () {
+        // Deleting Danger Detection
+        if (window.KEYBOARD.checkPressed('Alt') && this.hovered) {
+            this.material.color.setHex(0xff0000)
+            document.body.style.cursor = 'pointer'
+        }
+        else {
+            this.material.color.setHex(0xffffff)
+            document.body.style.cursor = 'default'
+        }
+    }
 }
 
 // Exporting Arrow

@@ -162,10 +162,10 @@ class Scene {
             this.wishCameraPosition.y // to
         , 10)
     }
-    focusCameraOn (node) {
+    focusCameraOn (node, shouldLookToNode = true) {
         if (node !== null) {
             this.nodesManage.onFocusOnNode(node)
-            this.lookToNode(node)
+            if (shouldLookToNode) this.lookToNode(node)
         } else {
             this.focusedNode = null
             this.nodesManage.storeNodeManageStatus(null)

@@ -33,8 +33,9 @@ class Node {
         // Define srcs and rfrs objects
         this.rfrs = [] // refer arrows
         this.srcs = [] // source arrows
-        // visibility
+        // some parameters
         this.visible = true
+        this.hovered = false
         // set initial props
         this.setInitialProps(initialProps)
         // Node Geometry
@@ -164,15 +165,22 @@ class Node {
         this.fixVisibility()
     }
     // Binding Events
-    onClick (e) { if (this.scene.focusedNode !== this) this.scene.focusCameraOn(this) }
+    onClick (e) {
+        // Remove if alt click on a node
+        if (window.KEYBOARD.checkPressed('Alt')) this.remove() 
+        // if the focusedNode isn't me lets focus on me
+        else if (this.scene.focusedNode !== this) this.scene.focusCameraOn(this)
+    }
     onDoubleClick (e) {}
     onMouseOver (e) {
         document.body.style.cursor = 'pointer'
         window.MOUSE.hoverOn = this
+        this.hovered = true
     }
     onMouseOut (e) {
         document.body.style.cursor = 'default'
         if (window.MOUSE.hoverOn == this) window.MOUSE.hoverOn = null
+        this.hovered = false
     }
     onMouseDown (e) {}
     onMouseUp (e) {}
@@ -183,7 +191,7 @@ class Node {
         this.scene.isDragging = true
     }
     onDragStart () {
-        if (window.KEYBOARD.checkPressed('Shift')) this.scene.disableEditingMode()
+        if (this.scene.focusedNode !== this) this.scene.focusCameraOn(this, false)
     }
     onDragEnd () {
         this.scene.isDragging = false
@@ -224,6 +232,11 @@ class Node {
         this.position.y = value
         this.fixPosition({y: value})
         if (lookAtMe) this.lookAtMe()
+    }
+    render () {
+        // Deleting Danger Detection
+        if (window.KEYBOARD.checkPressed('Alt') && this.hovered) this.material.color.setHex(0xff0000)
+        else  this.material.color.setHex(0xffffff)
     }
 }
 

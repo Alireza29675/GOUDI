@@ -103,8 +103,8 @@ class NodesManage {
         }
     }
     get (id) { return this.nodes[id] }
-    getByUUID (uuid) { for (let node of this.nodes) if (node instanceof Node) if (node.uuid == uuid) return node }
     getAllNodes () { return this.nodes.filter(node => node instanceof Node) }
+    getByUUID (uuid) { for (let node of this.getAllNodes()) if (node.uuid == uuid) return node }
     // Exploring and Focusing Management
     onFocusOnNode (node) {
         this.panel.focus(node)
@@ -160,7 +160,8 @@ class NodesManage {
         }
     }
     render () {
-
+        for (let node of this.getAllNodes()) node.render()
+        for (let arrow of this.getAllNodeToNodeArrows()) arrow.render()
     }
 }
 

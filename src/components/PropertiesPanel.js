@@ -35,7 +35,7 @@ class PropertiesPanel {
     focus (node) {
         if (this.active) {
             this.panel.container.classList.remove('show')
-            setTimeout(()=>{
+            setTimeout(() => {
                 this.resetPanel()
                 this.addNodePropsItems(node)
                 this.panel.container.classList.add('show')
