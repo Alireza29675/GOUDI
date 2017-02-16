@@ -44,6 +44,9 @@ class Property {
     setValue (value) {
         if (this.changebarContent !== undefined) this.changebarContent.value = value
     }
+    focus () {
+        this.changebarContent.focus()
+    }
     setCellContents () {
         this.changebarContent = null
         this.valueContent = null

@@ -241,17 +241,14 @@
 	        });
 	        // Adding nodes to Scene
 	        this.nodesManage = new _NodesManage2.default(this);
-	        var b = this.nodesManage.addNode({
+	        // Nodes load from server here
+	        this.nodesManage.addNode({
 	            id: 0,
 	            text: 'Application',
 	            x: 0,
 	            y: 50,
 	            initialSize: 100
 	        });
-	        a.connectTo(b);
-	        c.connectTo(a);
-	        c.connectTo(b);
-	        d.connectTo(b);
 	        // Set Focus Node
 	        this.focusedNode = null;
 	        this.nodesManage.loadNodeManageStatus();
@@ -343,7 +340,6 @@
 	            this.ghostNode.setPropertyX(window.MOUSE.scene.x);
 	            this.ghostNode.setPropertyY(window.MOUSE.scene.y);
 	            if (window.KEYBOARD.checkPressed('Meta') || window.KEYBOARD.checkPressed('Control')) {
-	                this.disableEditingMode();
 	                this.ghostNode.getObject3D().visible = true;
 	                this.renderer.domElement.style.cursor = 'copy';
 	            } else {
@@ -873,6 +869,10 @@
 	                    _this2.resetPanel();
 	                    _this2.addNodePropsItems(node);
 	                    _this2.panel.container.classList.add('show');
+	                    var focusableProps = _this2.panelProperties.filter(function (prop) {
+	                        return prop.options.type == 'text' || prop.options.type == 'number';
+	                    });
+	                    if (focusableProps.length > 0 && _this2.isOpen) focusableProps[0].focus();
 	                }, 300);
 	            }
 	        }
@@ -934,7 +934,8 @@
 	    }, {
 	        key: 'onPropSet',
 	        value: function onPropSet(prop, value) {
-	            this.getPropertyObject(prop).setValue(value);
+	            var property = this.getPropertyObject(prop);
+	            if (property !== undefined) property.setValue(value);
 	        }
 	    }, {
 	        key: 'resetPanel',
@@ -1050,6 +1051,11 @@
 	        key: 'setValue',
 	        value: function setValue(value) {
 	            if (this.changebarContent !== undefined) this.changebarContent.value = value;
+	        }
+	    }, {
+	        key: 'focus',
+	        value: function focus() {
+	            this.changebarContent.focus();
 	        }
 	    }, {
 	        key: 'setCellContents',
@@ -1228,7 +1234,7 @@
 
 
 	// module
-	exports.push([module.id, ".panel {\n    position: absolute;\n    top: 10px;\n    right: 10px;\n    background: #333;\n    width: 250px;\n    color: white;\n    border-radius: 10px;\n    overflow: hidden;\n    -webkit-user-select: none;\n    user-select: none;\n    font-family: Arial;\n    -webkit-font-smoothing: antialiased;\n    opacity: 0;\n    transform: scale(0.95);\n    transition-duration: 0.5s;\n    pointer-events: none;\n}\n.panel.show {\n    transform: scale(1);\n    opacity: 1;\n    pointer-events: auto;\n}\n.panel > .header {\n    width: 250px;\n    height: 40px;\n    position: relative;\n    cursor: pointer;\n    background: linear-gradient(#555, #555, #333);\n    border-radius: 10px;\n    transition-duration: 0.2s;\n}\n.panel > .header:hover {\n    opacity: 0.9;\n}\n.panel > .header:active {\n    opacity: 0.5;\n    transform: scale(0.98);\n}\n.panel > .header > i {\n    margin: 5px;\n    width: 30px;\n    height: 30px;\n    display: inline-block;\n    background-size: contain;\n}\n.panel > .header > i.node-icon {\n    background-image: url(" + __webpack_require__(9) + ")\n}\n/*.panel > .header > i.arrow-icon {\n    background-image: url(./images/arrow_icon.png)\n}*/\n.panel > .header > span {\n    font-size: 13px;\n    display: inline-block;\n    position: absolute;\n    left: 43px;\n    top: 12px;\n}\n.panel > .table {\n    display: table;\n    margin: 0;\n    width: 100%;\n    margin: 8px 0;\n}\n.panel > .table > .row {\n    display: table-row;\n    font-size: 11px;\n}\n.panel > .table > .row:nth-child(even) {\n    background: rgba(0,0,0,0.1)\n}\n.panel > .table > .row > div {\n    display: table-cell;\n    padding: 4px 2px;\n    height: 31px;\n    vertical-align: middle;\n}\n.panel > .table > .row > div.name {\n    text-align: right;\n    padding-left: 8px;\n    padding-right: 5px;\n    border-left: 4px solid red;\n}\n.panel > .table > .row > div.changebar {\n    padding-left: 5px;\n    padding-right: 5px;\n}\n.panel > .table > .row > div.value {\n    width: 30px;\n    padding-right: 10px;\n}\n.panel > .table > .row > div > input, .panel > .table > .row > div > select {\n    width: 100%;\n    height: 100%;\n    background: #333;\n    background: linear-gradient(#222, #292929);\n    outline: none;\n    border: none;\n    border-radius: 3px;\n    padding: 0 4px;\n    color: white;\n}\n.panel > .table > .row > div > button {\n    width: 100%;\n    height: 100%;\n}", ""]);
+	exports.push([module.id, ".panel {\n    position: absolute;\n    top: 10px;\n    right: 10px;\n    background: #333;\n    width: 250px;\n    color: white;\n    border-radius: 10px;\n    overflow: hidden;\n    -webkit-user-select: none;\n    user-select: none;\n    font-family: Arial;\n    -webkit-font-smoothing: antialiased;\n    opacity: 0;\n    transform: scale(0.95);\n    transition-duration: 0.3s;\n    pointer-events: none;\n}\n.panel.show {\n    transform: scale(1);\n    opacity: 1;\n    pointer-events: auto;\n}\n.panel > .header {\n    width: 250px;\n    height: 40px;\n    position: relative;\n    cursor: pointer;\n    background: linear-gradient(#555, #555, #333);\n    border-radius: 10px;\n    transition-duration: 0.2s;\n}\n.panel > .header:hover {\n    opacity: 0.9;\n}\n.panel > .header:active {\n    opacity: 0.5;\n    transform: scale(0.98);\n}\n.panel > .header > i {\n    margin: 5px;\n    width: 30px;\n    height: 30px;\n    display: inline-block;\n    background-size: contain;\n}\n.panel > .header > i.node-icon {\n    background-image: url(" + __webpack_require__(9) + ")\n}\n/*.panel > .header > i.arrow-icon {\n    background-image: url(./images/arrow_icon.png)\n}*/\n.panel > .header > span {\n    font-size: 13px;\n    display: inline-block;\n    position: absolute;\n    left: 43px;\n    top: 12px;\n}\n.panel > .table {\n    display: table;\n    margin: 0;\n    width: 100%;\n    margin: 8px 0;\n}\n.panel > .table > .row {\n    display: table-row;\n    font-size: 11px;\n}\n.panel > .table > .row:nth-child(even) {\n    background: rgba(0,0,0,0.1)\n}\n.panel > .table > .row > div {\n    display: table-cell;\n    padding: 4px 2px;\n    height: 31px;\n    vertical-align: middle;\n}\n.panel > .table > .row > div.name {\n    text-align: right;\n    padding-left: 8px;\n    padding-right: 5px;\n    border-left: 4px solid red;\n}\n.panel > .table > .row > div.changebar {\n    padding-left: 5px;\n    padding-right: 5px;\n}\n.panel > .table > .row > div.value {\n    width: 30px;\n    padding-right: 10px;\n}\n.panel > .table > .row > div > input, .panel > .table > .row > div > select {\n    width: 100%;\n    height: 100%;\n    background: #333;\n    background: linear-gradient(#222, #292929);\n    outline: none;\n    border: none;\n    border-radius: 3px;\n    padding: 0 4px;\n    color: white;\n}\n.panel > .table > .row > div > button {\n    width: 100%;\n    height: 100%;\n}", ""]);
 
 	// exports
 

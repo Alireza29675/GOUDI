@@ -43,17 +43,14 @@ class Scene {
         })
         // Adding nodes to Scene
         this.nodesManage = new NodesManage(this)
-        const b = this.nodesManage.addNode({
+        // Nodes load from server here
+        this.nodesManage.addNode({
             id: 0,
             text: 'Application',
             x: 0,
             y: 50,
             initialSize: 100
         })
-        a.connectTo(b)
-        c.connectTo(a)
-        c.connectTo(b)
-        d.connectTo(b)
         // Set Focus Node
         this.focusedNode = null
         this.nodesManage.loadNodeManageStatus()
@@ -128,7 +125,6 @@ class Scene {
         this.ghostNode.setPropertyX(window.MOUSE.scene.x)
         this.ghostNode.setPropertyY(window.MOUSE.scene.y)
         if (window.KEYBOARD.checkPressed('Meta') || window.KEYBOARD.checkPressed('Control')) {
-            this.disableEditingMode()
             this.ghostNode.getObject3D().visible = true
             this.renderer.domElement.style.cursor = 'copy'
         }

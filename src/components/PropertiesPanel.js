@@ -39,6 +39,8 @@ class PropertiesPanel {
                 this.resetPanel()
                 this.addNodePropsItems(node)
                 this.panel.container.classList.add('show')
+                const focusableProps = this.panelProperties.filter(prop => prop.options.type == 'text' || prop.options.type == 'number')
+                if (focusableProps.length > 0 && this.isOpen) focusableProps[0].focus()
             }, 300)
         }
     }
@@ -63,7 +65,8 @@ class PropertiesPanel {
         for (let property of this.panelProperties) if (property.options.name === prop) return property
     }
     onPropSet (prop, value) {
-        this.getPropertyObject(prop).setValue(value)
+        const property = this.getPropertyObject(prop)
+        if (property !== undefined) property.setValue(value)
     }
     resetPanel () {
         // freeing up memory
